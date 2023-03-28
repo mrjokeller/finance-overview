@@ -21,7 +21,7 @@ class CountryExpense(Base):
 
 class CountryDatabase:
     def __init__(self, db_name):
-        self.engine = create_engine(f'sqlite:///{db_name}.db')
+        self.engine = create_engine(f'sqlite:///databases/{db_name}.db')
         # Only activate the following line to create the database
         # Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
