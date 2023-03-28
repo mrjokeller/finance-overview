@@ -37,14 +37,14 @@ COUNTRIES = [
 ]
 
 databases = {country: CountryDatabase(country) for country in COUNTRIES}
-# databases["southafrica"].add_expense(name="test", cost=100, category="food", is_planned=True)
-
-
-
 
 
 def main():
-    pass
+    db = databases["southafrica"]
+    # db.add_expense("test", 10.0)
+    total_cost = db.get_total_cost(categories=["food"])
+    
+    print(f"{total_cost:.2f} EUR")
     # ui = UI()
     
     
