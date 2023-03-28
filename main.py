@@ -1,7 +1,4 @@
-from sqlalchemy import Column, Float, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from database import CountryDatabase
-
 from ui import UI
 
 COUNTRIES = [
@@ -40,12 +37,7 @@ databases = {country: CountryDatabase(country) for country in COUNTRIES}
 
 
 def main():
-    db = databases["southafrica"]
-    # db.add_expense("test", 10.0)
-    total_cost = db.get_total_cost(categories=["food"])
-    
-    print(f"{total_cost:.2f} EUR")
-    # ui = UI()
+    ui = UI(COUNTRIES, databases)
     
     
 if __name__ == "__main__":

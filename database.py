@@ -1,3 +1,4 @@
+from operator import and_
 from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -65,10 +66,23 @@ class CountryDatabase:
         session.close()
         return expenses
     
-    def get_total_cost(self, categories=None):
+    def get_total_cost(self, categories=None, is_planned=False):
+        """Returns the total cost of all expenses in the database.
+
+        Args:
+            categories (list, optional): Specify categories. Defaults to None.
+            is_planned (bool, optional): Specify if the expenses are planned or not. Input None for planned and unplanned expenses. Defaults to False.
+
+        Returns:
+            float: Total cost of all expenses in the database.
+        """
         session = self.Session()
         query = session.query(func.sum(CountryExpense.cost))
         if categories:
             query = query.filter(CountryExpense.category.in_(categories))
+        if is_planned is not None:
+            query = query.filter(CountryExpense.is_planned == is_planned)
+        if categories and is_planned is not None:
+            query = query.filter(and_(CountryExpense.category.in_(categories), CountryExpense.is_planned == is_planned))
         total_cost = query.scalar()
         return total_cost or 0
