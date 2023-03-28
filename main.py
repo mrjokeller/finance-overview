@@ -1,7 +1,8 @@
-from ui import UI
 from sqlalchemy import Column, Float, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from database import CountryDatabase
 
+from ui import UI
 
 COUNTRIES = [
     "southafrica",
@@ -35,26 +36,16 @@ COUNTRIES = [
     "newzealand"
 ]
 
-engines = [create_engine(f"sqlite:///{country}.db") for country in COUNTRIES]
-Base = declarative_base()
-
-class CountryExpense(Base):
-    __tablename__ = 'country_expense'
-    id = Column(Integer, primary_key=True)
-    country = Column(String)
-    flight = Column(Float)
-    accommodation = Column(Float)
-    trips = Column(Float)
-    food = Column(Float)
-    transport = Column(Float)
-    other = Column(Float)
+databases = {country: CountryDatabase(country) for country in COUNTRIES}
+# databases["southafrica"].add_expense(name="test", cost=100, category="food", is_planned=True)
 
 
 
 
 
 def main():
-    ui = UI()
+    pass
+    # ui = UI()
     
     
 if __name__ == "__main__":
