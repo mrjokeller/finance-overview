@@ -38,6 +38,7 @@ databases = {country: CountryDatabase(country) for country in COUNTRIES}
 
 def main():
     ui = UI(COUNTRIES, databases)
+    print(databases["southafrica"].get_category_cost())
     
     
 if __name__ == "__main__":

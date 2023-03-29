@@ -86,3 +86,22 @@ class CountryDatabase:
             query = query.filter(and_(CountryExpense.category.in_(categories), CountryExpense.is_planned == is_planned))
         total_cost = query.scalar()
         return total_cost or 0
+
+    def get_category_cost(self, is_planned=False):
+        """Returns the total cost of all expenses in the database.
+
+        Args:
+            category (str): Specify category.
+            is_planned (bool, optional): Specify if the expenses are planned or not. Input None for planned and unplanned expenses. Defaults to False.
+
+        Returns:
+            dict: Total cost of all expenses in the database per category.
+        """
+        session = self.Session()
+        categories = session.query(CountryExpense.category, func.sum(CountryExpense.cost)).\
+                                                                filter(CountryExpense.is_planned == is_planned).\
+                                                                group_by(CountryExpense.category).\
+                                                                order_by(CountryExpense.category).\
+                                                                all()
+        categories_dict = {category: cost for category, cost in categories}
+        return categories_dict or None
