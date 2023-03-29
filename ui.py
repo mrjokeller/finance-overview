@@ -15,7 +15,7 @@ class UI:
         self.window.config(padx=20, pady=20)
         
         # Dropdown menu
-        countries = [country.capitalize() for country in countries]
+        countries = [country.title() for country in countries]
         self.country_name = tk.StringVar()
         self.country_name.trace_add('write', self.update_expenses)
         self.country_name.set(countries[0])
@@ -31,6 +31,12 @@ class UI:
         self.total_planned_cost_label.grid(row=2, column=0, sticky='w')
         self.total_difference_label = tk.Label(self.window, text="Total difference: ")
         self.total_difference_label.grid(row=1, column=2, sticky='w')
+        
+        # Cost labels with actual expenses and planned expenses
+        self.total_cost = tk.Label(self.window, text="", pady=20)
+        self.total_cost.grid(row=1, column=1, sticky='e')
+        self.total_planned_cost = tk.Label(self.window, text="")
+        self.total_planned_cost.grid(row=2, column=1, sticky='e')
         
         # create a separator
         separator = ttk.Separator(self.window, orient='horizontal')

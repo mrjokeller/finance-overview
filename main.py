@@ -2,7 +2,7 @@ from database import CountryDatabase
 from ui import UI
 
 COUNTRIES = [
-    "southafrica",
+    "south africa",
     "mauritius",
     "kenya",
     "tanzania",
@@ -30,7 +30,7 @@ COUNTRIES = [
     "hawaii",
     "indonesia",
     "australia",
-    "newzealand"
+    "new zealand"
 ]
 CATEGORIES = [
     "flights",
@@ -41,7 +41,7 @@ CATEGORIES = [
     "other"
 ]
 
-databases = {country: CountryDatabase(country) for country in COUNTRIES}
+databases = {country: CountryDatabase(country.replace(" ", "")) for country in COUNTRIES}
 
 
 def main():
