@@ -10,8 +10,8 @@ class UI:
         self.category_labels = {}
         self.window = tk.Tk()
         self.window.title("Finanzen")
-        self.window.geometry("500x500")
-        self.window.minsize(300, 450)
+        self.window.geometry("500x450")
+        self.window.minsize(300, 400)
         
         self.window.config(padx=20, pady=20)
         
@@ -46,23 +46,33 @@ class UI:
         # Labels with total cost, total planned cost and total difference
         self.total_cost_label = tk.Label(self.window, text="Total:", font=("Arial", 16))
         self.total_cost_label.grid(row=10, column=0, sticky='w')
-        self.total_difference_label = tk.Label(self.window, text="Total difference: ", font=("Arial", 16))
-        self.total_difference_label.grid(row=11, column=0, sticky='w')
+        self.total_difference_label = tk.Label(self.window, text="Difference: ", font=("Arial", 16))
+        self.total_difference_label.grid(row=12, column=0, sticky='w')
         
         # Cost labels with actual expenses and planned expenses
-        self.total_cost = tk.Label(self.window, text="", pady=20)
+        self.total_cost = tk.Label(self.window, text="", font=("Arial", 16))
         self.total_cost.grid(row=10, column=1, sticky='e')
-        self.total_planned_cost = tk.Label(self.window, text="")
+        self.total_planned_cost = tk.Label(self.window, text="", font=("Arial", 16))
         self.total_planned_cost.grid(row=10, column=2, sticky='e')
         
+         # create a separator
+        separator = ttk.Separator(self.window, orient='horizontal')
+        separator.grid(row=11, column=0, columnspan=3, sticky='ew', pady=20)
+        
         # Difference cost
-        self.difference = tk.Label(self.window, text="", pady=20)
-        self.difference.grid(row=11, column=2, sticky='e')
+        self.difference = tk.Label(self.window, text="", font=("Arial", 16))
+        self.difference.grid(row=12, column=2, sticky='e')
+        
+        # Add expense button
+        self.add_expense_button = tk.Button(self.window, text="Add expense", command=self.add_expense)
+        self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
 
         self.update_expenses()
         
         self.window.mainloop()
-        
+    
+    def add_expense(self):
+        pass
     
     def update_expenses(self, *args):
         selected_country = self.country_name.get().lower()
