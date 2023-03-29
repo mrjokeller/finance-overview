@@ -104,4 +104,4 @@ class CountryDatabase:
                                                                 order_by(CountryExpense.category).\
                                                                 all()
         categories_dict = {category: cost for category, cost in categories}
-        return categories_dict or None
+        return categories_dict or {}

@@ -32,12 +32,20 @@ COUNTRIES = [
     "australia",
     "newzealand"
 ]
+CATEGORIES = [
+    "flights",
+    "accommodation",
+    "trips",
+    "food",
+    "transport",
+    "other"
+]
 
 databases = {country: CountryDatabase(country) for country in COUNTRIES}
 
 
 def main():
-    ui = UI(COUNTRIES, databases)
+    ui = UI(COUNTRIES, CATEGORIES, databases)
     
     
 if __name__ == "__main__":
