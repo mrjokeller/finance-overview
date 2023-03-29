@@ -8,7 +8,7 @@ class UI:
     
     def __init__(self, countries: list, databases):
         self.databases = databases
-        
+        self.category_labels = {}
         self.window = tk.Tk()
         self.window.title("Finanzen")
         self.window.geometry("800x600")
@@ -49,11 +49,23 @@ class UI:
         self.total_planned_cost_label.config(text=f"Total planned cost: {total_cost_planned} €")
         total_cost_actual = self.databases[selected_country].get_total_cost()
         self.total_cost_label.config(text=f"Total cost: {total_cost_actual} €")
-        self.total_difference_label.config(text=f"Total difference: {total_cost_actual - total_cost_planned} €")
+        difference = total_cost_planned - total_cost_actual
+        if difference < 0:
+            self.total_difference_label.config(text=f"Difference: {difference} €", fg="red")
+        else:
+            self.total_difference_label.config(text=f"Difference: {difference} €", fg="green")
         
-        self.categories = self.databases[self.country_name.get().lower()].get_category_cost()
+        
+        # Remove existing category labels
+        for label in self.category_labels.values():
+            label.destroy()
+            
+        self.categories = self.databases[selected_country].get_category_cost()
         if self.categories is None:
             return
+        
+        
+        
         self.category_labels = {}
         for i, category in enumerate(self.categories):
             label = tk.Label(self.window, text=category.capitalize())
