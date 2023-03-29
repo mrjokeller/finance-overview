@@ -18,6 +18,7 @@ class UI:
         # Dropdown menu
         countries = [country.capitalize() for country in countries]
         self.country_name = tk.StringVar()
+        self.country_name.trace_add('write', self.update_expenses)
         self.country_name.set(countries[0])
         self.dropdown = tk.OptionMenu(self.window, self.country_name, *countries)
         self.dropdown.grid(row=0, column=0, sticky='w', pady=20)
@@ -35,23 +36,33 @@ class UI:
         # create a separator
         separator = ttk.Separator(self.window, orient='horizontal')
         separator.grid(row=3, column=0, columnspan=3, sticky='ew', pady=20)
-        
-        # Labels for the different categories
-        self.categories = self.databases[self.country_name.get().lower()].get_category_cost()
-        for i, category in enumerate(self.categories):
-            tk.Label(self.window, text=category.capitalize()).grid(row=i+4, column=0, sticky='w')
-        
-        for i, category in enumerate(self.categories):
-            tk.Label(self.window, text=self.categories[category]).grid(row=i+4, column=1, sticky='e')
-        
+
         self.update_expenses()
         
         self.window.mainloop()
         
-    def update_expenses(self):
-        total_cost_planned = self.databases[self.country_name.get().lower()].get_total_cost(is_planned=True)
+    
+    def update_expenses(self, *args):
+        selected_country = self.country_name.get().lower()
+        
+        total_cost_planned = self.databases[selected_country].get_total_cost(is_planned=True)
         self.total_planned_cost_label.config(text=f"Total planned cost: {total_cost_planned} €")
-        total_cost_actual = self.databases[self.country_name.get().lower()].get_total_cost()
+        total_cost_actual = self.databases[selected_country].get_total_cost()
         self.total_cost_label.config(text=f"Total cost: {total_cost_actual} €")
         self.total_difference_label.config(text=f"Total difference: {total_cost_actual - total_cost_planned} €")
-        categories = self.databases[self.country_name.get().lower()].get_category_cost()
+        
+        self.categories = self.databases[self.country_name.get().lower()].get_category_cost()
+        if self.categories is None:
+            return
+        self.category_labels = {}
+        for i, category in enumerate(self.categories):
+            label = tk.Label(self.window, text=category.capitalize())
+            label.grid(row=i+4, column=0, sticky='w')
+            self.category_labels[category] = label
+            
+            value_label = tk.Label(self.window, text=self.categories[category])
+            value_label.grid(row=i+4, column=1, sticky='e')
+            self.category_labels[f"{category}_value"] = value_label
+        
+        
+
