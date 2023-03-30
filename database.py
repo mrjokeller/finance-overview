@@ -37,14 +37,10 @@ class CountryDatabase:
     def __init__(self, db_name):
         self.country_engine = create_engine(f'sqlite:///databases/{db_name}.db')
         # Only activate the following line to create the database
-        Base.metadata.create_all(self.country_engine, tables=[CountryExpense.__table__])
+        # Base.metadata.create_all(self.country_engine, tables=[CountryExpense.__table__])
         self.CountrySession = sessionmaker(bind=self.country_engine)
 
-        self.fixed_engine = create_engine('sqlite:///databases/fixed_costs.db')
-        # Only activate the following line to create the database
-        Base.metadata.create_all(self.fixed_engine, tables=[FixedCost.__table__])
-        self.FixedSession = sessionmaker(bind=self.fixed_engine)
-
+        
     def add_expense(self, name: str, cost: float, category="other", is_planned=False, date=datetime.now()):
         session = self.CountrySession()
         expense = CountryExpense(name=name, cost=cost, category=category, is_planned=is_planned, date=date)
@@ -68,7 +64,7 @@ class CountryDatabase:
         session.commit()
         session.close()
         
-    def delete_country_expense(self, entry_id):
+    def delete_expense(self, entry_id):
         session = self.CountrySession()
         entry_to_delete = session.query(CountryExpense).filter_by(id=entry_id).first()
         if entry_to_delete:
@@ -123,3 +119,62 @@ class CountryDatabase:
                                                                 all()
         categories_dict = {category: cost for category, cost in categories}
         return categories_dict or {}
+    
+class FixedDatabase:
+    
+    def __init__(self):
+        self.fixed_engine = create_engine('sqlite:///databases/fixed_costs.db')
+        # Only activate the following line to create the database
+        # Base.metadata.create_all(self.fixed_engine, tables=[FixedCost.__table__])
+        self.FixedSession = sessionmaker(bind=self.fixed_engine)
+
+    def add_expense(self, name: str, cost: float, frequency="yearly", start_date=datetime.now(), end_date=datetime.now()):
+        session = self.FixedSession()
+        expense = FixedCost(name=name, cost=cost, frequency=frequency, start_date=start_date, end_date=end_date)
+        session.add(expense)
+        session.commit()
+        session.close()
+        
+    def edit_expense(self, expense_id: int, new_cost: float, new_frequency: str, new_start_date: datetime, new_end_date: datetime):
+        session = self.FixedSession()
+
+        # query for expense by country name and expense id
+        expense = session.query(FixedCost).filter_by(id=expense_id).first()
+
+        # update expense attributes
+        expense.cost = new_cost
+        expense.frequency = new_frequency
+        expense.start_date = new_start_date
+        expense.end_date = new_end_date
+
+        # commit changes and close session
+        session.commit()
+        session.close()
+        
+    def delete_expense(self, entry_id):
+        session = self.FixedSession()
+        entry_to_delete = session.query(FixedCost).filter_by(id=entry_id).first()
+        if entry_to_delete:
+            session.delete(entry_to_delete)
+            session.commit()
+            print(f"Fixed expense with id {entry_id} deleted successfully.")
+        else:
+            print(f"No fixed expense found with id {entry_id}.")
+
+    def get_all_expenses(self):
+        session = self.FixedSession()
+        expenses = session.query(FixedCost).all()
+        session.close()
+        return expenses
+    
+    def get_total_cost(self):
+        """Returns the total cost of all fixed expenses in the database.
+
+        Returns:
+            float: Total cost of all fixed expenses in the database.
+        """
+        
+        session = self.FixedSession()
+        query = session.query(func.sum(FixedCost.cost))
+        total_cost = query.scalar()
+        return total_cost or 0

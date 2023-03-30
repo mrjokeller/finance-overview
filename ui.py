@@ -1,5 +1,6 @@
+import datetime as dt
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 
 class UI:
@@ -64,15 +65,85 @@ class UI:
         self.difference.grid(row=12, column=2, sticky='e')
         
         # Add expense button
-        self.add_expense_button = tk.Button(self.window, text="Add expense", command=self.add_expense)
+        self.add_expense_button = tk.Button(self.window, text="Add expense", command=self.add_expense_window)
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
 
         self.update_expenses()
         
         self.window.mainloop()
     
-    def add_expense(self):
-        pass
+    def add_expense_window(self):
+        add_expense_window = tk.Toplevel(self.window)
+        add_expense_window.title("Add expense")
+        add_expense_window.geometry("300x300")
+            
+        # Create the labels for the input fields
+        name_label = tk.Label(add_expense_window, text="Name")
+        category_label = tk.Label(add_expense_window, text="Category")
+        amount_label = tk.Label(add_expense_window, text="Amount")
+        date_label = tk.Label(add_expense_window, text="Date")
+        is_planned_label = tk.Label(add_expense_window, text="Planned")
+        
+        # Create the entry fields and dropdown for each label
+        name_entry = tk.Entry(add_expense_window, takefocus=True)
+        category_name = tk.StringVar()
+        category_name.set(self.categories[0].title())
+        category_dropdown = tk.OptionMenu(add_expense_window, category_name, *[category.title() for category in self.categories])
+        category_dropdown.config(width=16)
+        amount_entry = tk.Entry(add_expense_window)
+        date_entry = tk.Entry(add_expense_window, text=dt.datetime.now().strftime("%d.%m.%Y"))
+        checkbox_var = tk.BooleanVar()
+        is_planned_checkbox = tk.Checkbutton(add_expense_window, variable=checkbox_var)
+        add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), category=category_name.get(), amount=amount_entry.get(), date=date_entry.get(), is_planned=is_planned_checkbox))
+        
+        # Add the widgets to the window using the grid layout
+        name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        name_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+        category_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
+        category_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky='w')
+        amount_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
+        amount_entry.grid(row=2, column=1, padx=5, pady=5, sticky='w')
+        date_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
+        date_entry.grid(row=3, column=1, padx=5, pady=5, sticky='w')
+        is_planned_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
+        is_planned_checkbox.grid(row=4, column=1, padx=5, pady=5, sticky='w')
+        add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+
+    def add_expense(self, name: str, category: str, amount: str, date: str, is_planned: bool):
+        # Convert all values to the correct type
+        try:
+            name = str(name).capitalize()
+        except AttributeError:
+            messagebox.showerror("Error", "Invalid name")
+            return
+
+        try:
+            category = str(category).lower()
+        except AttributeError:
+            messagebox.showerror("Error", "Invalid category")
+            return
+
+        try:
+            amount = float(amount.replace(",", ".")) if amount else 0
+        except ValueError:
+            messagebox.showerror("Error", "Invalid amount")
+            return
+
+        try:
+            if date:
+                date = date.split(".")
+                date = dt.datetime(year=int(date[2]), month=int(date[1]), day=int(date[0]))
+            else:
+                date = dt.datetime.now()
+        except (ValueError, IndexError):
+            messagebox.showerror("Error", "Invalid date")
+            return
+
+        
+        # Add the expense to the database
+        selected_country = self.country_name.get().lower()
+        self.databases[selected_country].add_expense(name=name, category=category, cost=amount, date=date, is_planned=is_planned)
+        self.update_expenses()
     
     def update_expenses(self, *args):
         selected_country = self.country_name.get().lower()
