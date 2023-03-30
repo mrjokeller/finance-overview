@@ -36,21 +36,24 @@ class FixedCost(Base):
 class CountryDatabase:
     def __init__(self, db_name):
         self.country_engine = create_engine(f'sqlite:///databases/{db_name}.db')
-        self.fixed_engine = create_engine('sqlite:///databases/fixed.db')
         # Only activate the following line to create the database
-        Base.metadata.create_all(self.country_engine)
-        Base.metadata.create_all(self.fixed_engine)
-        self.Session = sessionmaker(bind=self.country_engine)
+        Base.metadata.create_all(self.country_engine, tables=[CountryExpense.__table__])
+        self.CountrySession = sessionmaker(bind=self.country_engine)
+
+        self.fixed_engine = create_engine('sqlite:///databases/fixed_costs.db')
+        # Only activate the following line to create the database
+        Base.metadata.create_all(self.fixed_engine, tables=[FixedCost.__table__])
+        self.FixedSession = sessionmaker(bind=self.fixed_engine)
 
     def add_expense(self, name: str, cost: float, category="other", is_planned=False, date=datetime.now()):
-        session = self.Session()
+        session = self.CountrySession()
         expense = CountryExpense(name=name, cost=cost, category=category, is_planned=is_planned, date=date)
         session.add(expense)
         session.commit()
         session.close()
         
     def edit_expense(self, expense_id: int, new_cost: float, new_category: str, is_planned: bool, date: datetime):
-        session = self.Session()
+        session = self.CountrySession()
 
         # query for expense by country name and expense id
         expense = session.query(CountryExpense).filter_by(id=expense_id).first()
@@ -66,7 +69,7 @@ class CountryDatabase:
         session.close()
         
     def delete_country_expense(self, entry_id):
-        session = self.Session()
+        session = self.CountrySession()
         entry_to_delete = session.query(CountryExpense).filter_by(id=entry_id).first()
         if entry_to_delete:
             session.delete(entry_to_delete)
@@ -76,7 +79,7 @@ class CountryDatabase:
             print(f"No country expense found with id {entry_id}.")
 
     def get_all_expenses(self):
-        session = self.Session()
+        session = self.CountrySession()
         expenses = session.query(CountryExpense).all()
         session.close()
         return expenses
@@ -91,7 +94,7 @@ class CountryDatabase:
         Returns:
             float: Total cost of all expenses in the database.
         """
-        session = self.Session()
+        session = self.CountrySession()
         query = session.query(func.sum(CountryExpense.cost))
         if categories:
             query = query.filter(CountryExpense.category.in_(categories))
@@ -112,7 +115,7 @@ class CountryDatabase:
         Returns:
             dict: Total cost of all expenses in the database per category.
         """
-        session = self.Session()
+        session = self.CountrySession()
         categories = session.query(CountryExpense.category, func.sum(CountryExpense.cost)).\
                                                                 filter(CountryExpense.is_planned == is_planned).\
                                                                 group_by(CountryExpense.category).\
