@@ -41,12 +41,42 @@ class CountryDatabase:
         self.CountrySession = sessionmaker(bind=self.country_engine)
 
         
-    def add_expense(self, name: str, cost: float, category="other", is_planned=False, date=datetime.now()):
+    def add_expense(self, name: str, cost: str, category: str, is_planned: bool, date: str):
         session = self.CountrySession()
+        # Convert all values to the correct type
+        try:
+            name = str(name).capitalize()
+        except AttributeError as e:
+            # messagebox.showerror("Error", "Invalid name")
+            return e
+
+        try:
+            category = str(category).lower()
+        except AttributeError as e:
+            # messagebox.showerror("Error", "Invalid category")
+            return e
+
+        try:
+            cost = float(cost.replace(",", ".")) if cost else 0
+        except ValueError as e:
+            # messagebox.showerror("Error", "Invalid amount")
+            return e
+
+        try:
+            if date:
+                date = date.split(".")
+                date = datetime(year=int(date[2]), month=int(date[1]), day=int(date[0]))
+            else:
+                date = datetime.now()
+        except (ValueError, IndexError) as e:
+            # messagebox.showerror("Error", "Invalid date")
+            return e
+        
         expense = CountryExpense(name=name, cost=cost, category=category, is_planned=is_planned, date=date)
         session.add(expense)
         session.commit()
         session.close()
+        return True
         
     def edit_expense(self, expense_id: int, new_cost: float, new_category: str, is_planned: bool, date: datetime):
         session = self.CountrySession()

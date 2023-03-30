@@ -94,7 +94,7 @@ class UI:
         date_entry = tk.Entry(add_expense_window, text=dt.datetime.now().strftime("%d.%m.%Y"))
         checkbox_var = tk.BooleanVar()
         is_planned_checkbox = tk.Checkbutton(add_expense_window, variable=checkbox_var)
-        add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), category=category_name.get(), amount=amount_entry.get(), date=date_entry.get(), is_planned=is_planned_checkbox))
+        add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
         
         # Add the widgets to the window using the grid layout
         name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
@@ -109,40 +109,21 @@ class UI:
         is_planned_checkbox.grid(row=4, column=1, padx=5, pady=5, sticky='w')
         add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
-    def add_expense(self, name: str, category: str, amount: str, date: str, is_planned: bool):
-        # Convert all values to the correct type
-        try:
-            name = str(name).capitalize()
-        except AttributeError:
-            messagebox.showerror("Error", "Invalid name")
-            return
-
-        try:
-            category = str(category).lower()
-        except AttributeError:
-            messagebox.showerror("Error", "Invalid category")
-            return
-
-        try:
-            amount = float(amount.replace(",", ".")) if amount else 0
-        except ValueError:
-            messagebox.showerror("Error", "Invalid amount")
-            return
-
-        try:
-            if date:
-                date = date.split(".")
-                date = dt.datetime(year=int(date[2]), month=int(date[1]), day=int(date[0]))
-            else:
-                date = dt.datetime.now()
-        except (ValueError, IndexError):
-            messagebox.showerror("Error", "Invalid date")
-            return
-
-        
+    def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
         # Add the expense to the database
         selected_country = self.country_name.get().lower()
-        self.databases[selected_country].add_expense(name=name, category=category, cost=amount, date=date, is_planned=is_planned)
+        add = self.databases[selected_country].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
+        if add is ValueError:
+            messagebox.showerror("Error", "There is something wrong with cost or date format.")
+            return
+        elif add is AttributeError:
+            messagebox.showerror("Error", "There is something wrong with the name.")
+            return
+        elif add is KeyError:
+            messagebox.showerror("Error", "There is something wrong with the date.")
+            return
+        else:
+            messagebox.showinfo("Success", "Expense added successfully.")
         self.update_expenses()
     
     def update_expenses(self, *args):
@@ -175,18 +156,18 @@ class UI:
             
             # Actual cost label
             try:
-                actual_label = tk.Label(self.window, text=categories_actual[category])
+                actual_label = tk.Label(self.window, text=f"{categories_actual[category]:.2f} €")
             except KeyError:
-                actual_label = tk.Label(self.window, text="0.00")
+                actual_label = tk.Label(self.window, text="0.00 €")
             
             actual_label.grid(row=i+3, column=1, sticky='e')
             self.category_labels[f"{category}_actual"] = actual_label
             
             # Planned cost label
             try:
-                planned_label = tk.Label(self.window, text=categories_planned[category])
+                planned_label = tk.Label(self.window, text=f"{categories_planned[category]:.2f} €")
             except KeyError:
-                planned_label = tk.Label(self.window, text="0.00")
+                planned_label = tk.Label(self.window, text="0.00 €")
             planned_label.grid(row=i+3, column=2, sticky='e')
             self.category_labels[f"{category}_planned"] = planned_label
 
