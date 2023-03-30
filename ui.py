@@ -75,7 +75,11 @@ class UI:
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
         add_expense_window.title("Add expense")
-        add_expense_window.geometry("300x300")
+        add_expense_window.geometry("300x250")
+        add_expense_window.resizable(False, False)
+        
+        add_expense_window.columnconfigure(0, weight=1)
+        add_expense_window.columnconfigure(1, weight=1)
             
         # Create the labels for the input fields
         name_label = tk.Label(add_expense_window, text="Name")
@@ -112,15 +116,9 @@ class UI:
     def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
         # Add the expense to the database
         selected_country = self.country_name.get().lower()
-        add = self.databases[selected_country].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
-        if add is ValueError:
-            messagebox.showerror("Error", "There is something wrong with cost or date format.")
-            return
-        elif add is AttributeError:
-            messagebox.showerror("Error", "There is something wrong with the name.")
-            return
-        elif add is KeyError:
-            messagebox.showerror("Error", "There is something wrong with the date.")
+        added_successfully = self.databases[selected_country].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
+        if not added_successfully:
+            messagebox.showerror("Error", "There is something wrong with the input.")
             return
         else:
             messagebox.showinfo("Success", "Expense added successfully.")
