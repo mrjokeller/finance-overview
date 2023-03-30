@@ -1,4 +1,4 @@
-from database import CountryDatabase
+from database import CountryDatabase, FixedCost
 from ui import UI
 
 COUNTRIES = [
@@ -42,6 +42,7 @@ CATEGORIES = [
 ]
 
 databases = {country: CountryDatabase(country.replace(" ", "")) for country in COUNTRIES}
+databases["fixed"] = FixedCost()
 
 
 def main():

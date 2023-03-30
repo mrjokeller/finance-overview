@@ -19,13 +19,28 @@ class CountryExpense(Base):
 
     def __repr__(self):
         return f"<CountryExpense(name='{self.name}', cost='{self.cost}', category='{self.category}', is_planned='{self.is_planned}', date='{self.date}')>"
+    
+class FixedCost(Base):
+    __tablename__ = 'fixed_costs'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    cost = Column(Float)
+    frequency = Column(String)
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
+    
+    def __repr__(self):
+        return f"<FixedCost(name='{self.name}', cost='{self.cost}', frequency='{self.frequency}', start_date='{self.start_date}', end_date='{self.end_date}')>"
 
 class CountryDatabase:
     def __init__(self, db_name):
-        self.engine = create_engine(f'sqlite:///databases/{db_name}.db')
+        self.country_engine = create_engine(f'sqlite:///databases/{db_name}.db')
+        self.fixed_engine = create_engine('sqlite:///databases/fixed.db')
         # Only activate the following line to create the database
-        # Base.metadata.create_all(self.engine)
-        self.Session = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(self.country_engine)
+        Base.metadata.create_all(self.fixed_engine)
+        self.Session = sessionmaker(bind=self.country_engine)
 
     def add_expense(self, name: str, cost: float, category="other", is_planned=False, date=datetime.now()):
         session = self.Session()
