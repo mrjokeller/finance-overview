@@ -67,6 +67,8 @@ class UI:
         # Add expense button
         self.add_expense_button = tk.Button(self.window, text="Add expense", command=self.add_expense_window)
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
+        
+        self.import_button = tk.Button(self.window, text="Import..", command=self.import_expenses_window)
 
         self.update_expenses()
         
@@ -112,11 +114,24 @@ class UI:
         is_planned_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
         is_planned_checkbox.grid(row=4, column=1, padx=5, pady=5, sticky='w')
         add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        
+    def import_expenses_window(self):
+        import_expenses_window = tk.Toplevel(self.window)
+        import_expenses_window.title("Import expenses")
+        import_expenses_window.geometry("300x250")
+        import_expenses_window.resizable(False, False)
+        
+        path_entry_label = tk.Label(import_expenses_window, text="Path to file")
+        path_entry_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        path_entry = tk.Entry(import_expenses_window)
+        path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+        
+        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[self.selected_country()](path=path_entry.get()))
+        import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
     def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
         # Add the expense to the database
-        selected_country = self.country_name.get().lower()
-        added_successfully = self.databases[selected_country].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
+        added_successfully = self.databases[self.selected_country()].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
         if not added_successfully:
             messagebox.showerror("Error", "There is something wrong with the input.")
             return
@@ -124,12 +139,10 @@ class UI:
             messagebox.showinfo("Success", "Expense added successfully.")
         self.update_expenses()
     
-    def update_expenses(self, *args):
-        selected_country = self.country_name.get().lower()
-        
+    def update_expenses(self):
         # Update overview costs
-        total_cost_actual = self.databases[selected_country].get_total_cost()
-        total_cost_planned = self.databases[selected_country].get_total_cost(is_planned=True)
+        total_cost_actual = self.databases[self.selected_country()].get_total_cost()
+        total_cost_planned = self.databases[self.selected_country()].get_total_cost(is_planned=True)
         difference = total_cost_planned - total_cost_actual
         
         self.total_cost.config(text=f"{total_cost_actual:.2f} €")
@@ -143,8 +156,8 @@ class UI:
         
         self.category_labels = {}
         
-        categories_actual = self.databases[selected_country].get_category_cost()
-        categories_planned = self.databases[selected_country].get_category_cost(is_planned=True)
+        categories_actual = self.databases[self.selected_country()].get_category_cost()
+        categories_planned = self.databases[self.selected_country()].get_category_cost(is_planned=True)
         
         for i, category in enumerate(self.categories):
             # Category Label
@@ -169,3 +182,6 @@ class UI:
             planned_label.grid(row=i+3, column=2, sticky='e')
             self.category_labels[f"{category}_planned"] = planned_label
 
+    def selected_country(self):
+        return self.country_name.get().lower()
+        
