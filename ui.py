@@ -69,6 +69,7 @@ class UI:
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
         
         self.import_button = tk.Button(self.window, text="Import..", command=self.import_expenses_window)
+        self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
 
         self.update_expenses()
         
@@ -126,7 +127,7 @@ class UI:
         path_entry = tk.Entry(import_expenses_window)
         path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         
-        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[self.selected_country()](path=path_entry.get()))
+        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[self.selected_country()].mass_import(path=path_entry.get()))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
     def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
