@@ -11,56 +11,67 @@ class UI:
         self.categories = categories
         self.category_labels = {}
         self.window = tk.Tk()
-        self.window.title("Finanzen")
-        self.window.geometry("500x450")
-        self.window.minsize(300, 400)
+        self.window.title("Travel Expenses")
+        self.window.geometry("500x500")
+        self.window.minsize(500, 500)
         
         self.window.config(padx=20, pady=20)
         
-        self.window.grid_columnconfigure(0, weight=2, uniform="fred")
-        self.window.grid_columnconfigure(1, weight=1, uniform="fred")
-        self.window.grid_columnconfigure(2, weight=1, uniform="fred")
+        self.tabview = ttk.Notebook(self.window, width=400, height=400)
+        self.tab1 = ttk.Frame(self.tabview)
+        self.tab2 = ttk.Frame(self.tabview)
+        self.tab3 = ttk.Frame(self.tabview)
+        self.tabview.add(self.tab1, text="Country")
+        self.tabview.add(self.tab2, text="Fixed Cost")
+        self.tabview.add(self.tab3, text="Income")
+        self.tabview.grid(row=0, column=0, columnspan=3, sticky='nsew')
+        
+        ### Tab 1 ###
+        
+        self.tab1.grid_columnconfigure(0, weight=2, uniform="fred")
+        self.tab1.grid_columnconfigure(1, weight=1, uniform="fred")
+        self.tab1.grid_columnconfigure(2, weight=1, uniform="fred")
         
         # create a separator
-        separator = ttk.Separator(self.window, orient='horizontal')
-        separator.grid(row=1, column=0, columnspan=3, sticky='ew', pady=20)
+        separator = ttk.Separator(self.tab1, orient='horizontal')
+        separator.grid(row=2, column=0, columnspan=3, sticky='ew', pady=10)
         
-        self.subheading_label = tk.Label(self.window, text="Categories", font=("Arial", 16))
-        self.subheading_label.grid(row=2, column=0, sticky='w')
-        self.subheading_label_2 = tk.Label(self.window, text="Actual", font=("Arial", 16))
-        self.subheading_label_2.grid(row=2, column=1, sticky='e')
-        self.subheading_label_3 = tk.Label(self.window, text="Planned", font=("Arial", 16))
-        self.subheading_label_3.grid(row=2, column=2, sticky='e')
+        self.subheading_label = tk.Label(self.tab1, text="Categories", font=("Arial", 16))
+        self.subheading_label.grid(row=1, column=0, sticky='w')
+        self.subheading_label_2 = tk.Label(self.tab1, text="Actual", font=("Arial", 16))
+        self.subheading_label_2.grid(row=1, column=1, sticky='e')
+        self.subheading_label_3 = tk.Label(self.tab1, text="Planned", font=("Arial", 16))
+        self.subheading_label_3.grid(row=1, column=2, sticky='e')
         
         # create a separator
-        separator = ttk.Separator(self.window, orient='horizontal')
-        separator.grid(row=9, column=0, columnspan=3, sticky='ew', pady=20)
+        separator = ttk.Separator(self.tab1, orient='horizontal')
+        separator.grid(row=9, column=0, columnspan=3, sticky='ew', pady=10)
         
         # Labels with total cost, total planned cost and total difference
-        self.total_cost_label = tk.Label(self.window, text="Total:", font=("Arial", 16))
+        self.total_cost_label = tk.Label(self.tab1, text="Total:", font=("Arial", 16))
         self.total_cost_label.grid(row=10, column=0, sticky='w')
-        self.total_difference_label = tk.Label(self.window, text="Difference: ", font=("Arial", 16))
+        self.total_difference_label = tk.Label(self.tab1, text="Difference: ", font=("Arial", 16))
         self.total_difference_label.grid(row=12, column=0, sticky='w')
         
         # Cost labels with actual expenses and planned expenses
-        self.total_cost = tk.Label(self.window, text="", font=("Arial", 16))
+        self.total_cost = tk.Label(self.tab1, text="", font=("Arial", 16))
         self.total_cost.grid(row=10, column=1, sticky='e')
-        self.total_planned_cost = tk.Label(self.window, text="", font=("Arial", 16))
+        self.total_planned_cost = tk.Label(self.tab1, text="", font=("Arial", 16))
         self.total_planned_cost.grid(row=10, column=2, sticky='e')
         
          # create a separator
-        separator = ttk.Separator(self.window, orient='horizontal')
-        separator.grid(row=11, column=0, columnspan=3, sticky='ew', pady=20)
+        separator = ttk.Separator(self.tab1, orient='horizontal')
+        separator.grid(row=11, column=0, columnspan=3, sticky='ew', pady=10)
         
         # Difference cost
-        self.difference = tk.Label(self.window, text="", font=("Arial", 16))
+        self.difference = tk.Label(self.tab1, text="", font=("Arial", 16))
         self.difference.grid(row=12, column=2, sticky='e')
         
         # Add expense button
-        self.add_expense_button = tk.Button(self.window, text="Add expense", command=self.add_expense_window)
+        self.add_expense_button = tk.Button(self.tab1, text="Add expense", command=self.add_expense_window)
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
         
-        self.import_button = tk.Button(self.window, text="Import..", command=self.import_expenses_window)
+        self.import_button = tk.Button(self.tab1, text="Import..", command=self.import_expenses_window)
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
         
         # Dropdown menu
@@ -68,9 +79,16 @@ class UI:
         self.country_name = tk.StringVar()
         self.country_name.trace_add('write', self.update_expenses)
         self.country_name.set(countries[0])
-        self.dropdown = tk.OptionMenu(self.window, self.country_name, *countries)
+        self.dropdown = tk.OptionMenu(self.tab1, self.country_name, *countries)
         self.dropdown.grid(row=0, column=0, sticky='w', pady=10)
         self.dropdown.config(width=8)
+        
+        ### Tab 2 ###
+        self.fixed_cost_label = tk.Label(self.tab2, text="Fixed costs")
+        self.fixed_cost_label.grid(row=0, column=0, sticky='w')
+        
+        self.fixed_cost = tk.Label(self.tab2, text="0")
+        self.fixed_cost.grid(row=0, column=1, sticky='e')
 
         self.update_expenses()
         
@@ -167,24 +185,24 @@ class UI:
         
         for i, category in enumerate(self.categories):
             # Category Label
-            label = tk.Label(self.window, text=category.capitalize())
+            label = tk.Label(self.tab1, text=category.capitalize())
             label.grid(row=i+3, column=0, sticky='w')
             self.category_labels[category] = label
             
             # Actual cost label
             try:
-                actual_label = tk.Label(self.window, text=f"{categories_actual[category]:.2f} €")
+                actual_label = tk.Label(self.tab1, text=f"{categories_actual[category]:.2f} €")
             except KeyError:
-                actual_label = tk.Label(self.window, text="0.00 €")
+                actual_label = tk.Label(self.tab1, text="0.00 €")
             
             actual_label.grid(row=i+3, column=1, sticky='e')
             self.category_labels[f"{category}_actual"] = actual_label
             
             # Planned cost label
             try:
-                planned_label = tk.Label(self.window, text=f"{categories_planned[category]:.2f} €")
+                planned_label = tk.Label(self.tab1, text=f"{categories_planned[category]:.2f} €")
             except KeyError:
-                planned_label = tk.Label(self.window, text="0.00 €")
+                planned_label = tk.Label(self.tab1, text="0.00 €")
             planned_label.grid(row=i+3, column=2, sticky='e')
             self.category_labels[f"{category}_planned"] = planned_label
         
