@@ -20,15 +20,6 @@ class UI:
         self.window.grid_columnconfigure(1, weight=1, uniform="fred")
         self.window.grid_columnconfigure(2, weight=1, uniform="fred")
         
-        # Dropdown menu
-        countries = [country.title() for country in countries]
-        self.country_name = tk.StringVar()
-        self.country_name.trace_add('write', self.update_expenses)
-        self.country_name.set(countries[0])
-        self.dropdown = tk.OptionMenu(self.window, self.country_name, *countries)
-        self.dropdown.grid(row=0, column=0, sticky='w', pady=10)
-        self.dropdown.config(width=8)
-        
         # create a separator
         separator = ttk.Separator(self.window, orient='horizontal')
         separator.grid(row=1, column=0, columnspan=3, sticky='ew', pady=20)
@@ -70,6 +61,15 @@ class UI:
         
         self.import_button = tk.Button(self.window, text="Import..", command=self.import_expenses_window)
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
+        
+        # Dropdown menu
+        countries = [country.title() for country in countries]
+        self.country_name = tk.StringVar()
+        self.country_name.trace_add('write', self.update_expenses)
+        self.country_name.set(countries[0])
+        self.dropdown = tk.OptionMenu(self.window, self.country_name, *countries)
+        self.dropdown.grid(row=0, column=0, sticky='w', pady=10)
+        self.dropdown.config(width=8)
 
         self.update_expenses()
         
@@ -128,12 +128,14 @@ class UI:
         path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         path_entry.insert(0, "/Users/jonathankeller/Documents/Programming/finance-overview/data.csv")
         
-        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[self.selected_country()].mass_import(path=path_entry.get()))
+        selected_country = self.country_name.get().lower()
+        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[selected_country].mass_import(path=path_entry.get()))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
     def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
         # Add the expense to the database
-        added_successfully = self.databases[self.selected_country()].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
+        selected_country = self.country_name.get().lower()
+        added_successfully = self.databases[selected_country].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
         if not added_successfully:
             messagebox.showerror("Error", "There is something wrong with the input.")
             return
@@ -141,10 +143,11 @@ class UI:
             messagebox.showinfo("Success", "Expense added successfully.")
         self.update_expenses()
     
-    def update_expenses(self):
+    def update_expenses(self, *args):
+        selected_country = self.country_name.get().lower()
         # Update overview costs
-        total_cost_actual = self.databases[self.selected_country()].get_total_cost()
-        total_cost_planned = self.databases[self.selected_country()].get_total_cost(is_planned=True)
+        total_cost_actual = self.databases[selected_country].get_total_cost()
+        total_cost_planned = self.databases[selected_country].get_total_cost(is_planned=True)
         difference = total_cost_planned - total_cost_actual
         
         self.total_cost.config(text=f"{total_cost_actual:.2f} €")
@@ -158,8 +161,8 @@ class UI:
         
         self.category_labels = {}
         
-        categories_actual = self.databases[self.selected_country()].get_category_cost()
-        categories_planned = self.databases[self.selected_country()].get_category_cost(is_planned=True)
+        categories_actual = self.databases[selected_country].get_category_cost()
+        categories_planned = self.databases[selected_country].get_category_cost(is_planned=True)
         
         for i, category in enumerate(self.categories):
             # Category Label
@@ -183,8 +186,4 @@ class UI:
                 planned_label = tk.Label(self.window, text="0.00 €")
             planned_label.grid(row=i+3, column=2, sticky='e')
             self.category_labels[f"{category}_planned"] = planned_label
-
-    def selected_country(self):
-        country = self.country_name.get().lower()
-        return country
         
