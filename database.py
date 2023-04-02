@@ -3,8 +3,6 @@ from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime, create
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
-import pandas as pd
-import converter
 
 Base = declarative_base()
 
@@ -50,17 +48,20 @@ class CountryDatabase:
             return False
         try:
             name = str(name).capitalize()
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
         try:
             category = str(category).lower()
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
         try:
             cost = float(cost.replace(",", ".")) if cost else 0
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
         try:
@@ -69,7 +70,8 @@ class CountryDatabase:
                 date = datetime(year=int(date[2]), month=int(date[1]), day=int(date[0]))
             else:
                 date = datetime.now()
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
         
         else:
@@ -78,13 +80,6 @@ class CountryDatabase:
             session.commit()
             session.close()
             return True
-        
-    def mass_import(self, path: str):
-        data = pd.read_csv(path)
-        clean_data = converter.data_frame_to_database(data)
-        for country, expense in clean_data.items():
-            print(f"Importing {country} and {expense}...")
-            return
         
     def edit_expense(self, expense_id: int, new_cost: float, new_category: str, is_planned: bool, date: datetime):
         session = self.CountrySession()

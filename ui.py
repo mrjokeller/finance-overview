@@ -1,6 +1,7 @@
 import datetime as dt
 import tkinter as tk
 from tkinter import ttk, messagebox
+import importer
 
 
 class UI:
@@ -129,7 +130,7 @@ class UI:
         path_entry.insert(0, "/Users/jonathankeller/Documents/Programming/finance-overview/data.csv")
         
         selected_country = self.country_name.get().lower()
-        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[selected_country].mass_import(path=path_entry.get()))
+        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: importer.mass_import(path=path_entry.get()))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
     def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
