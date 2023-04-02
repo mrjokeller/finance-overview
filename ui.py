@@ -126,6 +126,7 @@ class UI:
         path_entry_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         path_entry = tk.Entry(import_expenses_window)
         path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+        path_entry.insert(0, "/Users/jonathankeller/Documents/Programming/finance-overview/data.csv")
         
         import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: self.databases[self.selected_country()].mass_import(path=path_entry.get()))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
@@ -184,5 +185,6 @@ class UI:
             self.category_labels[f"{category}_planned"] = planned_label
 
     def selected_country(self):
-        return self.country_name.get().lower()
+        country = self.country_name.get().lower()
+        return country
         

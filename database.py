@@ -82,6 +82,9 @@ class CountryDatabase:
     def mass_import(self, path: str):
         data = pd.read_csv(path)
         clean_data = converter.data_frame_to_database(data)
+        for country, expense in clean_data.items():
+            print(f"Importing {country} and {expense}...")
+            return
         
     def edit_expense(self, expense_id: int, new_cost: float, new_category: str, is_planned: bool, date: datetime):
         session = self.CountrySession()
