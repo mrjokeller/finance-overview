@@ -89,10 +89,54 @@ class UI:
         
         self.fixed_cost = tk.Label(self.tab2, text="0")
         self.fixed_cost.grid(row=0, column=1, sticky='e')
+        
+        self.add_fixed_cost_button = tk.Button(self.tab2, text="Add fixed cost", command=self.add_fixed_cost_window)
+        self.add_fixed_cost_button.grid(row=1, column=0, columnspan=2, sticky='ew')
 
         self.update_expenses()
         
         self.window.mainloop()
+        
+    def add_fixed_cost_window(self):
+        add_fixed_cost_window = tk.Toplevel(self.window)
+        add_fixed_cost_window.title("Add fixed expense")
+        add_fixed_cost_window.geometry("300x250")
+        add_fixed_cost_window.resizable(False, False)
+        
+        add_fixed_cost_window.columnconfigure(0, weight=1)
+        add_fixed_cost_window.columnconfigure(1, weight=1)
+        
+        # Create the labels for the input fields
+        # def add_expense(self, name: str, cost: float, frequency="yearly", start_date=datetime.now(), end_date=datetime.now()):
+        name_label = tk.Label(add_fixed_cost_window, text="Name")
+        amount_label = tk.Label(add_fixed_cost_window, text="Amount")
+        frequency_label = tk.Label(add_fixed_cost_window, text="Frequency")
+        start_date_label = tk.Label(add_fixed_cost_window, text="Start Date")
+        end_date_label = tk.Label(add_fixed_cost_window, text="End Date")
+        
+        # Create the entry fields and dropdown for each label
+        name_entry = tk.Entry(add_fixed_cost_window, takefocus=True)
+        frequency_name = tk.StringVar()
+        frequency_name.set("Yearly")
+        frequency_dropdown = tk.OptionMenu(add_fixed_cost_window, frequency_name, *["Yearly", "Monthly", "Weekly"])
+        frequency_dropdown.config(width=16)
+        amount_entry = tk.Entry(add_fixed_cost_window)
+        date_entry = tk.Entry(add_fixed_cost_window, text=dt.datetime.now().strftime("%d.%m.%Y"))
+        checkbox_var = tk.BooleanVar()
+        is_planned_checkbox = tk.Checkbutton(add_fixed_cost_window, variable=checkbox_var)
+        add_button = tk.Button(add_fixed_cost_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), category=frequency_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()), state="disabled")
+        
+        # Add the widgets to the window using the grid layout
+        name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
+        name_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+        frequency_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
+        frequency_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky='w')
+        amount_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
+        amount_entry.grid(row=2, column=1, padx=5, pady=5, sticky='w')
+        start_date_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
+        date_entry.grid(row=3, column=1, padx=5, pady=5, sticky='w')
+        add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        
     
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
