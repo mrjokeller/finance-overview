@@ -206,15 +206,14 @@ class UI:
         category_dropdown = tk.OptionMenu(add_expense_window, category_name, *[category.title() for category in self.categories])
         category_dropdown.config(width=16)
         amount_entry = tk.Entry(add_expense_window)
-        date_entry = tk.Entry(add_expense_window, text=dt.datetime.now().strftime("%d.%m.%Y"))
+        date_entry = tk.Entry(add_expense_window)
+        date_entry.insert(0, dt.datetime.now().strftime("%d.%m.%Y"))
         checkbox_var = tk.BooleanVar()
         is_planned_checkbox = tk.Checkbutton(add_expense_window, variable=checkbox_var)
-        country_names = self.databases["country"].get_selected_countries()
-        if len(country_names) <= 0:
-            country_names = self.all_countries
+        country_names = self.all_countries
         country_name = tk.StringVar()
-        country_name.set(country_names[0])
-        country_dropdown = tk.OptionMenu(add_expense_window, country_name, *country_names)
+        country_name.set(self.country_name.get())
+        country_dropdown = tk.OptionMenu(add_expense_window, country_name, *[country.title() for country in country_names])
         add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
         
         # Add the widgets to the window using the grid layout
