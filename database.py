@@ -1,5 +1,5 @@
 from operator import and_
-from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime, create_engine, func
+from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime, create_engine, distinct, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -7,8 +7,8 @@ from datetime import datetime
 Base = declarative_base()
 
 
-class CountryExpense(Base):
-    __tablename__ = 'country_expenses'
+class Expense(Base):
+    __tablename__ = 'expenses'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -16,9 +16,10 @@ class CountryExpense(Base):
     category = Column(String)
     is_planned = Column(Boolean)
     date = Column(DateTime, default=datetime.now)
+    country = Column(String)
 
     def __repr__(self):
-        return f"<CountryExpense(name='{self.name}', cost='{self.cost}', category='{self.category}', is_planned='{self.is_planned}', date='{self.date}')>"
+        return f"<Expense(name='{self.name}', cost='{self.cost}', category='{self.category}', is_planned='{self.is_planned}', date='{self.date}', country='{self.country}')>"
     
 class FixedCost(Base):
     __tablename__ = 'fixed_costs'
@@ -32,17 +33,31 @@ class FixedCost(Base):
     
     def __repr__(self):
         return f"<FixedCost(name='{self.name}', cost='{self.cost}', frequency='{self.frequency}', start_date='{self.start_date}', end_date='{self.end_date}')>"
+    
+class Income(Base):
+    __tablename__ = 'income'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    amount = Column(Float)
+    category = Column(String)
+    date = Column(DateTime)
+    country = Column(String)
+    
+    def __repr__(self) -> str:
+        return f"<Income(name='{self.name}', amount='{self.amount}', category='{self.category}', date='{self.date}', country='{self.country}')>"
 
 class CountryDatabase:
-    def __init__(self, db_name):
-        self.country_engine = create_engine(f'sqlite:///databases/{db_name}.db')
+    def __init__(self):
+        self.engine = create_engine(f'sqlite:///expenses.db')
         # Only activate the following line to create the database
-        # Base.metadata.create_all(self.country_engine, tables=[CountryExpense.__table__])
-        self.CountrySession = sessionmaker(bind=self.country_engine)
+        # Base.metadata.create_all(self.country_engine)
+        self.Session = sessionmaker(bind=self.engine)
+        self.table_name = Expense
 
-        
-    def add_expense(self, name: str, cost: str, category: str, is_planned: bool, date: str):
-        session = self.CountrySession()
+    # TODO Update
+    def add_expense(self, name: str, cost: str, category: str, is_planned: bool, date: str, country: str):
+        session = self.Session()
         # Convert all values to the correct type
         if name == "":
             return False
@@ -74,18 +89,24 @@ class CountryDatabase:
             print(e)
             return False
         
+        try:
+            country = country.replace(" ", "").lower()
+        except Exception as e:
+            print(e)
+            return False
+        
         else:
-            expense = CountryExpense(name=name, cost=cost, category=category, is_planned=is_planned, date=date)
+            expense = Expense(name=name, cost=cost, category=category, is_planned=is_planned, date=date, country=country)
             session.add(expense)
             session.commit()
             session.close()
             return True
         
     def edit_expense(self, expense_id: int, new_cost: float, new_category: str, is_planned: bool, date: datetime):
-        session = self.CountrySession()
+        session = self.Session()
 
         # query for expense by country name and expense id
-        expense = session.query(CountryExpense).filter_by(id=expense_id).first()
+        expense = session.query(Expense).filter_by(id=expense_id).first()
 
         # update expense attributes
         expense.cost = new_cost
@@ -98,8 +119,8 @@ class CountryDatabase:
         session.close()
         
     def delete_expense(self, entry_id):
-        session = self.CountrySession()
-        entry_to_delete = session.query(CountryExpense).filter_by(id=entry_id).first()
+        session = self.Session()
+        entry_to_delete = session.query(Expense).filter_by(id=entry_id).first()
         if entry_to_delete:
             session.delete(entry_to_delete)
             session.commit()
@@ -108,8 +129,8 @@ class CountryDatabase:
             print(f"No country expense found with id {entry_id}.")
 
     def get_all_expenses(self):
-        session = self.CountrySession()
-        expenses = session.query(CountryExpense).all()
+        session = self.Session()
+        expenses = session.query(Expense).all()
         session.close()
         return expenses
     
@@ -123,14 +144,14 @@ class CountryDatabase:
         Returns:
             float: Total cost of all expenses in the database.
         """
-        session = self.CountrySession()
-        query = session.query(func.sum(CountryExpense.cost))
+        session = self.Session()
+        query = session.query(func.sum(Expense.cost))
         if categories:
-            query = query.filter(CountryExpense.category.in_(categories))
+            query = query.filter(Expense.category.in_(categories))
         if is_planned is not None:
-            query = query.filter(CountryExpense.is_planned == is_planned)
+            query = query.filter(Expense.is_planned == is_planned)
         if categories and is_planned is not None:
-            query = query.filter(and_(CountryExpense.category.in_(categories), CountryExpense.is_planned == is_planned))
+            query = query.filter(and_(Expense.category.in_(categories), Expense.is_planned == is_planned))
         total_cost = query.scalar()
         return total_cost or 0
 
@@ -144,14 +165,18 @@ class CountryDatabase:
         Returns:
             dict: Total cost of all expenses in the database per category.
         """
-        session = self.CountrySession()
-        categories = session.query(CountryExpense.category, func.sum(CountryExpense.cost)).\
-                                                                filter(CountryExpense.is_planned == is_planned).\
-                                                                group_by(CountryExpense.category).\
-                                                                order_by(CountryExpense.category).\
+        session = self.Session()
+        categories = session.query(Expense.category, func.sum(Expense.cost)).\
+                                                                filter(Expense.is_planned == is_planned).\
+                                                                group_by(Expense.category).\
+                                                                order_by(Expense.category).\
                                                                 all()
         categories_dict = {category: cost for category, cost in categories}
         return categories_dict or {}
+    
+    def get_selected_countries(self):
+        session = self.Session()
+        return [row[0] for row in session.query(distinct(Expense.country)).all()]
     
 class FixedDatabase:
     
@@ -160,6 +185,7 @@ class FixedDatabase:
         # Only activate the following line to create the database
         # Base.metadata.create_all(self.fixed_engine, tables=[FixedCost.__table__])
         self.FixedSession = sessionmaker(bind=self.fixed_engine)
+        self.table_name = FixedCost
 
     def add_expense(self, name: str, cost: float, frequency="yearly", start_date=datetime.now(), end_date=datetime.now()):
         session = self.FixedSession()
@@ -211,3 +237,12 @@ class FixedDatabase:
         query = session.query(func.sum(FixedCost.cost))
         total_cost = query.scalar()
         return total_cost or 0
+    
+class IncomeDatabase:
+    
+    def __init__(self) -> None:
+        self.engine = create_engine('sqlite:///expenses.db')
+        # Only activate the following line to create the database
+        # Base.metadata.create_all(self.fixed_engine, tables=[FixedCost.__table__])
+        self.FixedSession = sessionmaker(bind=self.engine)
+        self.table_name = Income

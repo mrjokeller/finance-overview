@@ -2,14 +2,27 @@ import datetime as dt
 import tkinter as tk
 from tkinter import ttk, messagebox
 import importer
+import json
 
+
+def get_countries():
+    with open("./countries.json", "r") as f:
+        countries_dict = json.load(f)
+    return countries_dict["countries"]
+
+def add_country(country: str):
+    countries = get_countries()
+    countries["countries"].extend(country.lower())
+    countries["countries"].sort()
+    with open("./countries.json", "w") as f:
+        json.dumps(countries)
+    
 
 class UI:
     
-    def __init__(self, countries: list, categories: list, databases):
-        self.databases = databases
-        self.categories = categories
-        self.category_labels = {}
+    def __init__(self, categories: dict, databases: dict):
+        
+        # Setup main window
         self.window = tk.Tk()
         self.window.title("Travel Expenses")
         self.window.geometry("500x500")
@@ -17,6 +30,7 @@ class UI:
         
         self.window.config(padx=20, pady=20)
         
+        # Setup tabs
         self.tabview = ttk.Notebook(self.window, width=400, height=400)
         self.tab1 = ttk.Frame(self.tabview)
         self.tab2 = ttk.Frame(self.tabview)
@@ -25,6 +39,15 @@ class UI:
         self.tabview.add(self.tab2, text="Fixed Cost")
         self.tabview.add(self.tab3, text="Income")
         self.tabview.grid(row=0, column=0, columnspan=3, sticky='nsew')
+        
+        # Setup of lists and dictionaries
+        self.databases = databases
+        self.categories = categories
+        self.all_countries = get_countries()
+        self.countries = databases["country"].get_selected_countries()
+        if self.countries == []:
+            self.add_expense_window()
+        self.category_labels = {}
         
         ### Tab 1 ###
         
@@ -75,7 +98,9 @@ class UI:
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
         
         # Dropdown menu
-        countries = [country.title() for country in countries]
+        countries = [country.title() for country in self.countries]
+        if countries == []:
+            countries = ["-"]
         self.country_name = tk.StringVar()
         self.country_name.trace_add('write', self.update_expenses)
         self.country_name.set(countries[0])
@@ -96,6 +121,24 @@ class UI:
         self.update_expenses()
         
         self.window.mainloop()
+        
+    def add_country_window(self):
+        add_country_window = tk.Toplevel(self.window)
+        add_country_window.title("Add country")
+        add_country_window.geometry("300x300")
+        add_country_window.resizable(False, False)
+        
+        add_country_window.columnconfigure(0, weight=1)
+        add_country_window.columnconfigure(1, weight=1)
+        
+        # Label
+        tk.Label(add_country_window, text="Country:").grid(row=0, column=0, sticky="e")
+        
+        # Dropdown
+        country_name = tk.StringVar()
+        country_name.set(self.all_countries[0])
+        country_dropdown = tk.OptionMenu(add_country_window, country_name, *self.all_countries)
+        
         
     def add_fixed_cost_window(self):
         add_fixed_cost_window = tk.Toplevel(self.window)
@@ -141,7 +184,7 @@ class UI:
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
         add_expense_window.title("Add expense")
-        add_expense_window.geometry("300x250")
+        add_expense_window.geometry("300x260")
         add_expense_window.resizable(False, False)
         
         add_expense_window.columnconfigure(0, weight=1)
@@ -153,6 +196,7 @@ class UI:
         amount_label = tk.Label(add_expense_window, text="Amount")
         date_label = tk.Label(add_expense_window, text="Date")
         is_planned_label = tk.Label(add_expense_window, text="Planned")
+        country_label = tk.Label(add_expense_window, text="Country")
         
         # Create the entry fields and dropdown for each label
         name_entry = tk.Entry(add_expense_window, takefocus=True)
@@ -164,20 +208,28 @@ class UI:
         date_entry = tk.Entry(add_expense_window, text=dt.datetime.now().strftime("%d.%m.%Y"))
         checkbox_var = tk.BooleanVar()
         is_planned_checkbox = tk.Checkbutton(add_expense_window, variable=checkbox_var)
-        add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
+        country_names = self.databases["country"].get_selected_countries()
+        if len(country_names) <= 0:
+            country_names = self.all_countries
+        country_name = tk.StringVar()
+        country_name.set(country_names[0])
+        country_dropdown = tk.OptionMenu(add_expense_window, country_name, *country_names)
+        add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
         
         # Add the widgets to the window using the grid layout
         name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
-        name_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
-        category_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
-        category_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky='w')
-        amount_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
-        amount_entry.grid(row=2, column=1, padx=5, pady=5, sticky='w')
-        date_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
-        date_entry.grid(row=3, column=1, padx=5, pady=5, sticky='w')
-        is_planned_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
-        is_planned_checkbox.grid(row=4, column=1, padx=5, pady=5, sticky='w')
-        add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        name_entry.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
+        country_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        country_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        category_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
+        category_dropdown.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
+        amount_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
+        amount_entry.grid(row=3, column=1, padx=5, pady=5, sticky='ew')
+        date_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
+        date_entry.grid(row=4, column=1, padx=5, pady=5, sticky='ew')
+        is_planned_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
+        is_planned_checkbox.grid(row=5, column=1, padx=5, pady=5, sticky='ew')
+        add_button.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
         
     def import_expenses_window(self):
         import_expenses_window = tk.Toplevel(self.window)
@@ -191,14 +243,12 @@ class UI:
         path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         path_entry.insert(0, "/Users/jonathankeller/Documents/Programming/finance-overview/data.csv")
         
-        selected_country = self.country_name.get().lower()
         import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: importer.mass_import(path=path_entry.get()))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
-    def add_expense(self, name: str, category: str, cost: str, date: str, is_planned: bool):
+    def add_expense(self, name: str, country: str, category: str, cost: str, date: str, is_planned: bool):
         # Add the expense to the database
-        selected_country = self.country_name.get().lower()
-        added_successfully = self.databases[selected_country].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned)
+        added_successfully = self.databases["country"].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned, country=country)
         if not added_successfully:
             messagebox.showerror("Error", "There is something wrong with the input.")
             return
@@ -207,10 +257,10 @@ class UI:
         self.update_expenses()
     
     def update_expenses(self, *args):
-        selected_country = self.country_name.get().lower()
         # Update overview costs
-        total_cost_actual = self.databases[selected_country].get_total_cost()
-        total_cost_planned = self.databases[selected_country].get_total_cost(is_planned=True)
+        selected_country = self.country_name.get()
+        total_cost_actual = self.databases["country"].get_total_cost()
+        total_cost_planned = self.databases["country"].get_total_cost(is_planned=True)
         difference = total_cost_planned - total_cost_actual
         
         self.total_cost.config(text=f"{total_cost_actual:.2f} €")
@@ -224,8 +274,8 @@ class UI:
         
         self.category_labels = {}
         
-        categories_actual = self.databases[selected_country].get_category_cost()
-        categories_planned = self.databases[selected_country].get_category_cost(is_planned=True)
+        categories_actual = self.databases["country"].get_category_cost()
+        categories_planned = self.databases["country"].get_category_cost(is_planned=True)
         
         for i, category in enumerate(self.categories):
             # Category Label
@@ -249,4 +299,4 @@ class UI:
                 planned_label = tk.Label(self.tab1, text="0.00 €")
             planned_label.grid(row=i+3, column=2, sticky='e')
             self.category_labels[f"{category}_planned"] = planned_label
-        
+            

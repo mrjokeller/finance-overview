@@ -1,37 +1,6 @@
-from database import CountryDatabase, FixedCost
+from database import CountryDatabase, FixedDatabase, IncomeDatabase
 from ui import UI
 
-COUNTRIES = [
-    "south africa",
-    "mauritius",
-    "kenya",
-    "tanzania",
-    "israel",
-    "egypt",
-    "morocco",
-    "uae",
-    "thailand",
-    "vietnam",
-    "malaysia",
-    "indonesia",
-    "india",
-    "nepal",
-    "philippines",
-    "japan",
-    "mexico",
-    "cuba",
-    "europe",
-    "costarica",
-    "panama",
-    "argentina",
-    "chile",
-    "brazil",
-    "peru",
-    "hawaii",
-    "indonesia",
-    "australia",
-    "new zealand"
-]
 CATEGORIES = [
     "flights",
     "accommodation",
@@ -41,14 +10,13 @@ CATEGORIES = [
     "other"
 ]
 
-databases = {country: CountryDatabase(country.replace(" ", "")) for country in COUNTRIES}
-databases["fixed"] = FixedCost()
-
-
-def main():
-    ui = UI(COUNTRIES, CATEGORIES, databases)
+databases = {
+    "country": CountryDatabase(),
+    "fixed": FixedDatabase(),
+    "income": IncomeDatabase()
+}
     
     
 if __name__ == "__main__":
-    main()
+    ui = UI(CATEGORIES, databases)
     
