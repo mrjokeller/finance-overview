@@ -55,7 +55,6 @@ class CountryDatabase:
         self.Session = sessionmaker(bind=self.engine)
         self.table_name = Expense
 
-    # TODO Update
     def add_expense(self, name: str, cost: str, category: str, is_planned: bool, date: str, country: str):
         session = self.Session()
         # Convert all values to the correct type
@@ -90,7 +89,7 @@ class CountryDatabase:
             return False
         
         try:
-            country = country.replace(" ", "").lower()
+            country = country.lower()
         except Exception as e:
             print(e)
             return False
@@ -102,7 +101,7 @@ class CountryDatabase:
             session.close()
             return True
         
-    def edit_expense(self, expense_id: int, new_cost: float, new_category: str, is_planned: bool, date: datetime):
+    def edit_expense(self, expense_id: int, new_cost: float, new_country: str, new_category: str, is_planned: bool, date: datetime):
         session = self.Session()
 
         # query for expense by country name and expense id
@@ -110,6 +109,7 @@ class CountryDatabase:
 
         # update expense attributes
         expense.cost = new_cost
+        expense.country = new_country
         expense.category = new_category
         expense.is_planned = is_planned
         expense.date = date
@@ -134,7 +134,7 @@ class CountryDatabase:
         session.close()
         return expenses
     
-    def get_total_cost(self, categories=None, is_planned=False):
+    def get_total_cost(self, country: str, categories=None, is_planned=False):
         """Returns the total cost of all expenses in the database.
 
         Args:
@@ -145,7 +145,8 @@ class CountryDatabase:
             float: Total cost of all expenses in the database.
         """
         session = self.Session()
-        query = session.query(func.sum(Expense.cost))
+        query = session.query(func.sum(Expense.cost)).filter(Expense.country == country.lower())
+        query.scalar()
         if categories:
             query = query.filter(Expense.category.in_(categories))
         if is_planned is not None:

@@ -98,13 +98,13 @@ class UI:
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
         
         # Dropdown menu
-        countries = [country.title() for country in self.countries]
-        if countries == []:
-            countries = ["-"]
+        self.dropdown_countries = [country.title() for country in self.countries]
+        if self.dropdown_countries == []:
+            self.dropdown_countries = ["-"]
         self.country_name = tk.StringVar()
         self.country_name.trace_add('write', self.update_expenses)
-        self.country_name.set(countries[0])
-        self.dropdown = tk.OptionMenu(self.tab1, self.country_name, *countries)
+        self.country_name.set(self.dropdown_countries[0])
+        self.dropdown = tk.OptionMenu(self.tab1, self.country_name, *self.dropdown_countries)
         self.dropdown.grid(row=0, column=0, sticky='w', pady=10)
         self.dropdown.config(width=8)
         
@@ -138,6 +138,7 @@ class UI:
         country_name = tk.StringVar()
         country_name.set(self.all_countries[0])
         country_dropdown = tk.OptionMenu(add_country_window, country_name, *self.all_countries)
+        country_dropdown.grid(row=0, column=1, sticky="w")
         
         
     def add_fixed_cost_window(self):
@@ -255,12 +256,19 @@ class UI:
         else:
             messagebox.showinfo("Success", "Expense added successfully.")
         self.update_expenses()
+        self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
+        self.country_name.set(self.dropdown_countries[0])
+        self.dropdown['menu'].delete(0, 'end')
+        for country in self.dropdown_countries:
+            self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
+        
+        
     
     def update_expenses(self, *args):
         # Update overview costs
         selected_country = self.country_name.get()
-        total_cost_actual = self.databases["country"].get_total_cost()
-        total_cost_planned = self.databases["country"].get_total_cost(is_planned=True)
+        total_cost_actual = self.databases["country"].get_total_cost(selected_country)
+        total_cost_planned = self.databases["country"].get_total_cost(selected_country, is_planned=True)
         difference = total_cost_planned - total_cost_actual
         
         self.total_cost.config(text=f"{total_cost_actual:.2f} €")
