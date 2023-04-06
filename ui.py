@@ -282,8 +282,8 @@ class UI:
         
         self.category_labels = {}
         
-        categories_actual = self.databases["country"].get_category_cost()
-        categories_planned = self.databases["country"].get_category_cost(is_planned=True)
+        categories_actual = self.databases["country"].get_category_cost(selected_country)
+        categories_planned = self.databases["country"].get_category_cost(selected_country, is_planned=True)
         
         for i, category in enumerate(self.categories):
             # Category Label

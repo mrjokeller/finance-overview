@@ -156,7 +156,7 @@ class CountryDatabase:
         total_cost = query.scalar()
         return total_cost or 0
 
-    def get_category_cost(self, is_planned=False):
+    def get_category_cost(self, country: str, is_planned=False):
         """Returns the total cost of all expenses in the database.
 
         Args:
@@ -168,7 +168,7 @@ class CountryDatabase:
         """
         session = self.Session()
         categories = session.query(Expense.category, func.sum(Expense.cost)).\
-                                                                filter(Expense.is_planned == is_planned).\
+                                                                filter(and_(Expense.country == country.lower(), Expense.is_planned == is_planned)).\
                                                                 group_by(Expense.category).\
                                                                 order_by(Expense.category).\
                                                                 all()
