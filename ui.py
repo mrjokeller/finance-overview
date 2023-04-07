@@ -22,12 +22,14 @@ def get_categories():
         categories_dict = json.load(f)["categories"]
     return categories_dict
     
-def add_category(sub_category: str, main_category="other"):
-    with open("./data.json", "r") as f:
-        data = json.load(f)
-    with open("./data.json", "w") as f:
-        data["categories"][main_category.lower()].append(sub_category.lower())
-        json.dump(data, f, indent=4) 
+def add_category(sub_category: str, main_category="other"):#
+    if messagebox.askokcancel(title="Check again", message=f"Is this right?\nCategory: {sub_category}\nMain Category: {main_category}"):
+        with open("./data.json", "r") as f:
+            data = json.load(f)
+        with open("./data.json", "w") as f:
+            data["categories"][main_category.lower()].append(sub_category.lower())
+            json.dump(data, f, indent=4)
+            messagebox.showinfo(title="Success", message=f"New category '{sub_category}' successfully saved.")
         
 
 class UI:
