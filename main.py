@@ -17,7 +17,6 @@ databases = {
     "income": IncomeDatabase()
 }
 
-# TODO update mass import
 # TODO Add button to set budget
 # TODO Add button for income
 # TODO Add income to budget

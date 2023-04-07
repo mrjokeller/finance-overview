@@ -313,6 +313,7 @@ class UI:
         file_name = filedialog.askopenfilename(initialdir = "/", title="Select A File")
         importer.mass_import(path=file_name)
         self.tab1.after(1000, self.update_expenses)
+        self.update_country_dropdown()
 
     def add_expense(self, name: str, cost: str, category: str, country="", date="01.01.1970", start_date="01.01.1970", end_date="31.12.2100", frequency="Yearly", is_planned=False, fixed=False):
         # Add the expense to the database
@@ -327,15 +328,15 @@ class UI:
             return
         else:
             messagebox.showinfo("Success", "Expense added successfully.")
+            
+    def update_country_dropdown(self):
+        self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
+        self.country_name.set(self.dropdown_countries[0])
+        self.dropdown['menu'].delete(0, 'end')
+        for country in self.dropdown_countries:
+            self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
           
     def update_expenses(self, *args):
-        # Update dropdown with new countries
-        if len(self.databases["country"].get_selected_countries()) > 0:
-            self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
-            self.country_name.set(self.dropdown_countries[0])
-            self.dropdown['menu'].delete(0, 'end')
-            for country in self.dropdown_countries:
-                self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
         # Update overview costs
         selected_country = self.country_name.get()
         total_cost_actual = self.databases["country"].get_total_cost(selected_country)
