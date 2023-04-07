@@ -181,8 +181,9 @@ class UI:
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
         add_expense_window.title("Add expense")
-        add_expense_window.geometry("300x260")
+        add_expense_window.geometry("330x280")
         add_expense_window.resizable(False, False)
+        add_expense_window.config(padx=10, pady=10)
         
         add_expense_window.columnconfigure(0, weight=1)
         add_expense_window.columnconfigure(1, weight=1)
@@ -232,26 +233,28 @@ class UI:
         
         # Add the widgets to the window using the grid layout
         name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
-        name_entry.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
+        name_entry.grid(row=0, column=1, columnspan=2, padx=5, pady=5, sticky='ew')
         country_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        country_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        country_dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky="ew")
         category_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
         category_dropdown.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
         add_category_button.grid(row=2, column=2, padx=5, pady=5, sticky='ew')
         amount_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
-        amount_entry.grid(row=3, column=1, padx=5, pady=5, sticky='ew')
+        amount_entry.grid(row=3, column=1, columnspan=2, padx=5, pady=5, sticky='ew')
         date_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
-        date_entry.grid(row=4, column=1, padx=5, pady=5, sticky='ew')
+        date_entry.grid(row=4, column=1, columnspan=2, padx=5, pady=5, sticky='ew')
         is_planned_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
         is_planned_checkbox.grid(row=5, column=1, padx=5, pady=5, sticky='ew')
-        add_button.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        add_button.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky='ew')
         
     def add_category_window(self):
         add_category_window = tk.Toplevel(self.window)
         add_category_window.title("Add category")
+        add_category_window.config(padx=20, pady=20)
+        add_category_window.resizable(False, False)
         
-        tk.Label(add_category_window, text="Category").grid(row=0, column=0)
-        tk.Label(add_category_window, text="Main Category").grid(row=1, column=0)
+        tk.Label(add_category_window, text="Category").grid(row=0, column=0, sticky="w")
+        tk.Label(add_category_window, text="Main Category").grid(row=1, column=0, sticky="w")
         
         category_entry = tk.Entry(add_category_window)
         main_category_var = tk.StringVar()
@@ -260,9 +263,9 @@ class UI:
         main_category_dropdown = tk.OptionMenu(add_category_window, main_category_var, *main_categories)
         add_button = tk.Button(add_category_window, text="Add", command=lambda: add_category(sub_category=category_entry.get(), main_category=main_category_var.get()))
         
-        category_entry.grid(row=0, column=1, sticky="ew")
-        main_category_dropdown.grid(row=1, column=1, sticky="ew")
-        add_button.grid(row=2, column=0, columnspan=2, sticky="ew")
+        category_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        main_category_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        add_button.grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
         
     def import_expenses_window(self):
         import_expenses_window = tk.Toplevel(self.window)
