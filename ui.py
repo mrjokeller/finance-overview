@@ -160,6 +160,9 @@ class UI:
         self.import_button.grid(row=14, column=0, columnspan=3, pady=5, sticky='ew')
         
         ### Tab 2 ###
+        self.tab2.grid_columnconfigure(0, weight=2, uniform="fred")
+        self.tab2.grid_columnconfigure(1, weight=1, uniform="fred")
+        self.tab2.grid_columnconfigure(2, weight=1, uniform="fred")
         # Headings
         self.heading_tab2 = tk.Label(self.tab2, text="Country", font=FONTS["heading"])
         self.heading2_tab2 = tk.Label(self.tab2, text="Actual", font=FONTS["heading"])
@@ -175,7 +178,7 @@ class UI:
         for i, country in enumerate(self.countries):
             # Category Label
             label = tk.Label(self.tab2, text=country.title())
-            label.grid(row=i+1, column=0, sticky='w')
+            label.grid(row=i+1, column=0, padx=5, pady=5, sticky='w')
             self.country_labels[country] = label
             
             # Actual cost label
@@ -184,7 +187,7 @@ class UI:
             except KeyError:
                 actual_label = tk.Label(self.tab2, text="0.00 €")
             
-            actual_label.grid(row=i+1, column=1, sticky='e')
+            actual_label.grid(row=i+1, column=1, padx=5, pady=5, sticky='e')
             self.country_labels[f"{country}_actual"] = actual_label
             
             # Planned cost label
@@ -192,7 +195,7 @@ class UI:
                 planned_label = tk.Label(self.tab2, text=f"{self.databases['country'].get_total_cost(country, is_planned=True):.2f} €")
             except KeyError:
                 planned_label = tk.Label(self.tab2, text="0.00 €")
-            planned_label.grid(row=i+1, column=2, sticky='e')
+            planned_label.grid(row=i+1, column=2, padx=5, pady=5, sticky='e')
             self.country_labels[f"{country}_planned"] = planned_label
             
         print(self.country_labels)
