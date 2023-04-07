@@ -17,8 +17,6 @@ databases = {
     "income": IncomeDatabase()
 }
 
-# TODO Add Category Button in add expense window
-# TODO Add Category method in UI class
 # TODO Add fixed cost tab in add expense window
 # TODO Add fixed cost button in fixed cost tab
 # TODO Add button to set budget
