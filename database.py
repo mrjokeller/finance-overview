@@ -3,8 +3,14 @@ from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime, create
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+import json
 
 Base = declarative_base()
+
+def get_categories():
+    with open("./data.json", "r") as f:
+        categories_dict = json.load(f)["categories"]
+    return categories_dict
 
 
 class Expense(Base):
@@ -63,19 +69,16 @@ class CountryDatabase:
         try:
             name = str(name).capitalize()
         except Exception as e:
-            print(e)
             return False
 
         try:
             category = str(category).lower()
         except Exception as e:
-            print(e)
             return False
 
         try:
             cost = float(cost.replace(",", ".")) if cost else 0
         except Exception as e:
-            print(e)
             return False
 
         try:
@@ -85,13 +88,13 @@ class CountryDatabase:
             else:
                 date = datetime.now()
         except Exception as e:
-            print(e)
             return False
         
+        if country == "-":
+            return False
         try:
             country = country.lower()
         except Exception as e:
-            print(e)
             return False
         
         else:
@@ -167,13 +170,34 @@ class CountryDatabase:
             dict: Total cost of all expenses in the database per category.
         """
         session = self.Session()
+        main_categories = ["flights", "accomodation", "trips", "food", "transport", "other"]
+        sub_main = {}
+        main_sub = get_categories()
+        for i, subcategories in enumerate(get_categories().values()):
+            for subcategory in subcategories:
+                sub_main[subcategory] = main_categories[i]
+            
         categories = session.query(Expense.category, func.sum(Expense.cost)).\
                                                                 filter(and_(Expense.country == country.lower(), Expense.is_planned == is_planned)).\
                                                                 group_by(Expense.category).\
                                                                 order_by(Expense.category).\
                                                                 all()
+                                                                
         categories_dict = {category: cost for category, cost in categories}
-        return categories_dict or {}
+        print(categories_dict)
+        cost_dict = {}
+        print(sub_main)
+        for category in categories_dict:
+            try:
+                entry = cost_dict[sub_main[category]]
+            except KeyError:
+                cost_dict[sub_main[category]] = categories_dict[category]
+            else:
+                cost_dict[sub_main[category]] += categories_dict[category]
+            
+        print(cost_dict)
+        
+        return cost_dict or {}
     
     def get_selected_countries(self):
         session = self.Session()

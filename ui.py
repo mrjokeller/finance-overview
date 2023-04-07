@@ -6,7 +6,7 @@ import json
 
 
 def get_countries():
-    with open("./countries.json", "r") as f:
+    with open("./data.json", "r") as f:
         countries_dict = json.load(f)
     return countries_dict["countries"]
 
@@ -14,8 +14,13 @@ def add_country(country: str):
     countries = get_countries()
     countries["countries"].extend(country.lower())
     countries["countries"].sort()
-    with open("./countries.json", "w") as f:
+    with open("./data.json", "w") as f:
         json.dumps(countries)
+        
+def get_categories():
+    with open("./data.json", "r") as f:
+        categories_dict = json.load(f)["categories"]
+    return categories_dict
     
 
 class UI:
@@ -42,11 +47,11 @@ class UI:
         
         # Setup of lists and dictionaries
         self.databases = databases
-        self.categories = categories
+        self.categories = get_categories()
         self.all_countries = get_countries()
         self.countries = databases["country"].get_selected_countries()
-        if self.countries == []:
-            self.add_expense_window()
+        # if self.countries == []:
+        #     self.add_expense_window()
         self.category_labels = {}
         
         ### Tab 1 ###
@@ -90,23 +95,23 @@ class UI:
         self.difference = tk.Label(self.tab1, text="", font=("Arial", 16))
         self.difference.grid(row=12, column=2, sticky='e')
         
+        # Dropdown menu
+        self.dropdown_countries = [country.title() for country in self.countries]
+        if self.dropdown_countries == []:
+            self.dropdown_countries = ["-"]
+        self.country_name = tk.StringVar()
+        self.country_name.set(self.dropdown_countries[0])
+        self.country_name.trace_add('write', self.update_expenses)
+        self.dropdown = tk.OptionMenu(self.tab1, self.country_name, *self.dropdown_countries)
+        self.dropdown.grid(row=0, column=0, sticky='w', pady=10)
+        self.dropdown.config(width=8)
+        
         # Add expense button
         self.add_expense_button = tk.Button(self.tab1, text="Add expense", command=self.add_expense_window)
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
         
         self.import_button = tk.Button(self.tab1, text="Import..", command=self.import_expenses_window)
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
-        
-        # Dropdown menu
-        self.dropdown_countries = [country.title() for country in self.countries]
-        if self.dropdown_countries == []:
-            self.dropdown_countries = ["-"]
-        self.country_name = tk.StringVar()
-        self.country_name.trace_add('write', self.update_expenses)
-        self.country_name.set(self.dropdown_countries[0])
-        self.dropdown = tk.OptionMenu(self.tab1, self.country_name, *self.dropdown_countries)
-        self.dropdown.grid(row=0, column=0, sticky='w', pady=10)
-        self.dropdown.config(width=8)
         
         ### Tab 2 ###
         self.fixed_cost_label = tk.Label(self.tab2, text="Fixed costs")
@@ -202,8 +207,8 @@ class UI:
         # Create the entry fields and dropdown for each label
         name_entry = tk.Entry(add_expense_window, takefocus=True)
         category_name = tk.StringVar()
-        category_name.set(self.categories[0].title())
-        category_dropdown = tk.OptionMenu(add_expense_window, category_name, *[category.title() for category in self.categories])
+        category_name.set(self.categories["flights"][0].title())
+        category_dropdown = tk.OptionMenu(add_expense_window, category_name, *[subcategory.title() for category in self.categories.values() for subcategory in category])
         category_dropdown.config(width=16)
         amount_entry = tk.Entry(add_expense_window)
         date_entry = tk.Entry(add_expense_window)

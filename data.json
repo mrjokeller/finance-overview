@@ -25,6 +25,14 @@
         "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine",
         "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan",
         "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-    ]
+    ],
+    "categories": {
+        "flights": ["flights"],
+        "accomodation": ["accomodation"],
+        "trips": ["trips", "sigthseeing"],
+        "food": ["food", "groceries", "restaurant", "delivery"],
+        "transport": ["transport", "car rental", "public transport"],
+        "other": ["other"]
+    }
     
 }
