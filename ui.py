@@ -2,8 +2,17 @@ import datetime as dt
 import json
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+import darkdetect
 
 import importer
+
+FONTS = {
+    "small": ("Helvetica Neue Thin", 8),
+    "body": ("Helvetica Neue", 12),
+    "subtitle": ("Helvetica Neue Medium", 14),
+    "heading": ("Helvetica Neue Light", 16),
+    "title": ("Helvetica Neue Ultralight", 22)
+}
 
 
 def get_countries():
@@ -59,7 +68,11 @@ class UI:
         self.window.minsize(500, 500)
         
         self.window.config(padx=20, pady=20)
-        
+        self.window.option_add("*Font", FONTS["body"])
+        if darkdetect.isDark():
+            self.window.option_add("*Background", "#3a3a3a")
+        else:
+            self.window.option_add("*Background", "#e4e4e4")
         # Setup tabs
         self.tabview = ttk.Notebook(self.window, width=400, height=400)
         self.tab1 = ttk.Frame(self.tabview)
@@ -87,11 +100,11 @@ class UI:
         separator = ttk.Separator(self.tab1, orient='horizontal')
         separator.grid(row=2, column=0, columnspan=3, sticky='ew', pady=10)
         
-        self.subheading_label = tk.Label(self.tab1, text="Categories", font=("Arial", 16))
+        self.subheading_label = tk.Label(self.tab1, text="Categories", font=FONTS["subtitle"])
         self.subheading_label.grid(row=1, column=0, sticky='w')
-        self.subheading_label_2 = tk.Label(self.tab1, text="Actual", font=("Arial", 16))
+        self.subheading_label_2 = tk.Label(self.tab1, text="Actual", font=FONTS["subtitle"])
         self.subheading_label_2.grid(row=1, column=1, sticky='e')
-        self.subheading_label_3 = tk.Label(self.tab1, text="Planned", font=("Arial", 16))
+        self.subheading_label_3 = tk.Label(self.tab1, text="Planned", font=FONTS["subtitle"])
         self.subheading_label_3.grid(row=1, column=2, sticky='e')
         
         # create a separator
@@ -99,15 +112,15 @@ class UI:
         separator.grid(row=9, column=0, columnspan=3, sticky='ew', pady=10)
         
         # Labels with total cost, total planned cost and total difference
-        self.total_cost_label = tk.Label(self.tab1, text="Total:", font=("Arial", 16))
+        self.total_cost_label = tk.Label(self.tab1, text="Total:", font=FONTS["subtitle"])
         self.total_cost_label.grid(row=10, column=0, sticky='w')
-        self.total_difference_label = tk.Label(self.tab1, text="Difference: ", font=("Arial", 16))
+        self.total_difference_label = tk.Label(self.tab1, text="Difference: ", font=FONTS["subtitle"])
         self.total_difference_label.grid(row=12, column=0, sticky='w')
         
         # Cost labels with actual expenses and planned expenses
-        self.total_cost = tk.Label(self.tab1, text="", font=("Arial", 16))
+        self.total_cost = tk.Label(self.tab1, text="", font=FONTS["subtitle"])
         self.total_cost.grid(row=10, column=1, sticky='e')
-        self.total_planned_cost = tk.Label(self.tab1, text="", font=("Arial", 16))
+        self.total_planned_cost = tk.Label(self.tab1, text="", font=FONTS["subtitle"])
         self.total_planned_cost.grid(row=10, column=2, sticky='e')
         
          # create a separator
@@ -115,7 +128,7 @@ class UI:
         separator.grid(row=11, column=0, columnspan=3, sticky='ew', pady=10)
         
         # Difference cost
-        self.difference = tk.Label(self.tab1, text="", font=("Arial", 16))
+        self.difference = tk.Label(self.tab1, text="", font=FONTS["subtitle"])
         self.difference.grid(row=12, column=2, sticky='e')
         
         # Dropdown menu
@@ -131,16 +144,18 @@ class UI:
         
         # Add expense button
         self.add_expense_button = tk.Button(self.tab1, text="Add expense", command=self.add_expense_window)
-        self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
+        self.add_expense_button.grid(row=13, column=0, columnspan=3, pady=5, sticky='ew')
         
         self.import_button = tk.Button(self.tab1, text="Import..", command=self.import_and_update_expenses)
-        self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
+        self.import_button.grid(row=14, column=0, columnspan=3, pady=5, sticky='ew')
         
         ### Tab 2 ###
-        self.fixed_cost_label = tk.Label(self.tab2, text="Fixed costs")
+        # Headings
+        self.heading_tab2 = tk.Label
+        self.fixed_cost_label = tk.Label(self.tab2, text="Fixed costs", font=FONTS["heading"])
         self.fixed_cost_label.grid(row=0, column=0, sticky='w')
         
-        self.fixed_cost = tk.Label(self.tab2, text="0")
+        self.fixed_cost = tk.Label(self.tab2, text="0", font=FONTS["heading"])
         self.fixed_cost.grid(row=0, column=1, sticky='e')
 
         self.update_expenses()
@@ -166,10 +181,10 @@ class UI:
         tabview.grid(row=0, column=0, columnspan=3, sticky='nsew')
         
         tab1.columnconfigure(0, weight=1)
-        tab1.columnconfigure(1, weight=1)
+        tab1.columnconfigure(1, weight=2)
         tab1.columnconfigure(2, weight=1)
         tab2.columnconfigure(0, weight=1)
-        tab2.columnconfigure(1, weight=1)
+        tab2.columnconfigure(1, weight=2)
         tab2.columnconfigure(2, weight=1)
         
         ### Tab 1 - Standard expense entry ###
@@ -209,12 +224,14 @@ class UI:
         # Buttons
         add_button = tk.Button(
             tab1, 
-            text="Add", 
+            text="Add",
+            font=FONTS["body"], 
             command=lambda: (self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()),
                              add_expense_window.destroy()))
         add_category_button = tk.Button(
             tab1,
             text="+",
+            font=FONTS["body"],
             command=self.add_category_window
         )
         
@@ -264,12 +281,14 @@ class UI:
         # Buttons
         add_button2 = tk.Button(
             tab2, 
-            text="Add", 
+            text="Add",
+            font=FONTS["body"],
             command=lambda: (self.add_expense(name=name_entry2.get(), frequency=frequency_var.get(), category=category_name2.get(), cost=cost_entry.get(), start_date=start_date_entry.get(), end_date=end_date_entry.get(), fixed=True),
                              add_expense_window.destroy()))
         add_category_button2 = tk.Button(
             tab2,
             text="+",
+            font=FONTS["body"],
             command=self.add_category_window
         )
         
@@ -379,4 +398,3 @@ class UI:
                 planned_label = tk.Label(self.tab1, text="0.00 €")
             planned_label.grid(row=i+3, column=2, sticky='e')
             self.category_labels[f"{category}_planned"] = planned_label
-            
