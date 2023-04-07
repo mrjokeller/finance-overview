@@ -22,6 +22,13 @@ def get_categories():
         categories_dict = json.load(f)["categories"]
     return categories_dict
     
+def add_category(sub_category: str, main_category="other"):
+    with open("./data.json", "r") as f:
+        data = json.load(f)
+    with open("./data.json", "w") as f:
+        data["categories"][main_category].append(sub_category)
+        json.dump(data, f, indent=4) 
+        
 
 class UI:
     
@@ -50,8 +57,6 @@ class UI:
         self.categories = get_categories()
         self.all_countries = get_countries()
         self.countries = databases["country"].get_selected_countries()
-        # if self.countries == []:
-        #     self.add_expense_window()
         self.category_labels = {}
         
         ### Tab 1 ###

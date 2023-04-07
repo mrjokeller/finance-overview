@@ -1,5 +1,6 @@
 from database import CountryDatabase, FixedDatabase, IncomeDatabase
 from ui import UI
+import ui
 
 CATEGORIES = [
     "flights",
@@ -27,5 +28,5 @@ databases = {
 # TODO compare daily expense vs budget plus income
     
 if __name__ == "__main__":
-    ui = UI(CATEGORIES, databases)
+    main_ui = UI(CATEGORIES, databases)
     
