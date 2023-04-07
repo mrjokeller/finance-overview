@@ -197,6 +197,7 @@
         "Zambia",
         "Zimbabwe"
     ],
+    "budget": 0,
     "categories": {
         "flights": [
             "flights"

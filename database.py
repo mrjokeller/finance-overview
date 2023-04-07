@@ -196,7 +196,7 @@ class CountryDatabase:
         
         return cost_dict or {}
     
-    def get_selected_countries(self):
+    def get_all_countries(self):
         session = self.Session()
         return [row[0] for row in session.query(distinct(Expense.country)).all()]
     

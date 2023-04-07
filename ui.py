@@ -88,7 +88,7 @@ class UI:
         self.tab2 = ttk.Frame(self.tabview)
         self.tab3 = ttk.Frame(self.tabview)
         self.tabview.add(self.tab1, text="Country")
-        self.tabview.add(self.tab2, text="Fixed Cost")
+        self.tabview.add(self.tab2, text="Overview")
         self.tabview.add(self.tab3, text="Income")
         self.tabview.grid(row=0, column=0, columnspan=3, sticky='nsew')
         
@@ -96,8 +96,9 @@ class UI:
         self.databases = databases
         self.categories = get_categories()
         self.all_countries = get_countries()
-        self.countries = databases["country"].get_selected_countries()
+        self.countries = databases["country"].get_all_countries()
         self.category_labels = {}
+        self.country_labels = {}
         
         ### Tab 1 ###
         
@@ -160,12 +161,46 @@ class UI:
         
         ### Tab 2 ###
         # Headings
-        self.heading_tab2 = tk.Label
-        self.fixed_cost_label = tk.Label(self.tab2, text="Fixed costs", font=FONTS["heading"])
-        self.fixed_cost_label.grid(row=0, column=0, sticky='w')
+        self.heading_tab2 = tk.Label(self.tab2, text="Country", font=FONTS["heading"])
+        self.heading2_tab2 = tk.Label(self.tab2, text="Actual", font=FONTS["heading"])
+        self.heading3_tab2 = tk.Label(self.tab2, text="Planned", font=FONTS["heading"])
         
-        self.fixed_cost = tk.Label(self.tab2, text="0", font=FONTS["heading"])
-        self.fixed_cost.grid(row=0, column=1, sticky='e')
+        # Scrollview with all countries with expenses so far
+        # Remove existing category labels
+        for label in self.country_labels.values():
+            label.destroy()
+        
+        self.country_labels = {}
+        
+        for i, country in enumerate(self.countries):
+            # Category Label
+            label = tk.Label(self.tab2, text=country.title())
+            label.grid(row=i+1, column=0, sticky='w')
+            self.country_labels[country] = label
+            
+            # Actual cost label
+            try:
+                actual_label = tk.Label(self.tab2, text=f"{self.databases['country'].get_total_cost(country):.2f} €")
+            except KeyError:
+                actual_label = tk.Label(self.tab2, text="0.00 €")
+            
+            actual_label.grid(row=i+1, column=1, sticky='e')
+            self.country_labels[f"{country}_actual"] = actual_label
+            
+            # Planned cost label
+            try:
+                planned_label = tk.Label(self.tab2, text=f"{self.databases['country'].get_total_cost(country, is_planned=True):.2f} €")
+            except KeyError:
+                planned_label = tk.Label(self.tab2, text="0.00 €")
+            planned_label.grid(row=i+1, column=2, sticky='e')
+            self.country_labels[f"{country}_planned"] = planned_label
+            
+        print(self.country_labels)
+        
+        # Positioning of widgets tab 2
+        self.heading_tab2.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        self.heading2_tab2.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+        self.heading3_tab2.grid(row=0, column=2, padx=5, pady=5, sticky="e")
 
         self.update_expenses()
         
@@ -358,7 +393,7 @@ class UI:
             messagebox.showinfo("Success", "Expense added successfully.")
             
     def update_country_dropdown(self):
-        self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
+        self.dropdown_countries = [country.title() for country in self.databases["country"].get_all_countries()]
         self.country_name.set(self.dropdown_countries[0])
         self.dropdown['menu'].delete(0, 'end')
         for country in self.dropdown_countries:
