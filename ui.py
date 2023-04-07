@@ -1,8 +1,9 @@
 import datetime as dt
-import tkinter as tk
-from tkinter import ttk, messagebox
-import importer
 import json
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+
+import importer
 
 
 def get_countries():
@@ -132,7 +133,7 @@ class UI:
         self.add_expense_button = tk.Button(self.tab1, text="Add expense", command=self.add_expense_window)
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
         
-        self.import_button = tk.Button(self.tab1, text="Import..", command=self.import_expenses_window)
+        self.import_button = tk.Button(self.tab1, text="Import..", command=lambda: (importer.mass_import(path=filedialog.askopenfilename(initialdir = "/", title="Select A File")), self.update_expenses))
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
         
         ### Tab 2 ###
@@ -141,9 +142,6 @@ class UI:
         
         self.fixed_cost = tk.Label(self.tab2, text="0")
         self.fixed_cost.grid(row=0, column=1, sticky='e')
-        
-        # self.add_fixed_cost_button = tk.Button(self.tab2, text="Add fixed cost", command=self.add_fixed_cost_window)
-        # self.add_fixed_cost_button.grid(row=1, column=0, columnspan=2, sticky='ew')
 
         self.update_expenses()
         
@@ -317,13 +315,15 @@ class UI:
         import_expenses_window.geometry("300x250")
         import_expenses_window.resizable(False, False)
         
+        file_name = filedialog.askopenfilename(initialdir = "/", title="Select A File")
+        
         path_entry_label = tk.Label(import_expenses_window, text="Path to file")
         path_entry_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         path_entry = tk.Entry(import_expenses_window)
         path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         path_entry.insert(0, "/Users/jonathankeller/Documents/Programming/finance-overview/data.csv")
         
-        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: importer.mass_import(path=path_entry.get()))
+        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: importer.mass_import(path=file_name))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
     def add_expense(self, name: str, cost: str, category: str, country="", date="01.01.1970", start_date="01.01.1970", end_date="31.12.2100", frequency="Yearly", is_planned=False, fixed=False):
@@ -343,8 +343,7 @@ class UI:
             return
         else:
             messagebox.showinfo("Success", "Expense added successfully.")
-        
-    
+          
     def update_expenses(self, *args):
         # Update overview costs
         selected_country = self.country_name.get()

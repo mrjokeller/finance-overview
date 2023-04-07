@@ -17,8 +17,6 @@ databases = {
     "income": IncomeDatabase()
 }
 
-# TODO Add fixed cost button in fixed cost tab
-# TODO Update fixed database methods
 # TODO update mass import
 # TODO Add button to set budget
 # TODO Add button for income

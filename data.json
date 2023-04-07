@@ -201,12 +201,13 @@
         "flights": [
             "flights"
         ],
-        "accomodation": [
-            "accomodation"
+        "accommodation": [
+            "accommodation"
         ],
         "trips": [
             "trips",
-            "sigthseeing"
+            "sigthseeing",
+            "tours"
         ],
         "food": [
             "food",
