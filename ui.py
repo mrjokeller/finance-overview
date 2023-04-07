@@ -26,7 +26,7 @@ def add_category(sub_category: str, main_category="other"):
     with open("./data.json", "r") as f:
         data = json.load(f)
     with open("./data.json", "w") as f:
-        data["categories"][main_category].append(sub_category)
+        data["categories"][main_category.lower()].append(sub_category.lower())
         json.dump(data, f, indent=4) 
         
 
@@ -183,28 +183,46 @@ class UI:
             
         # Create the labels for the input fields
         name_label = tk.Label(add_expense_window, text="Name")
+        country_label = tk.Label(add_expense_window, text="Country")
         category_label = tk.Label(add_expense_window, text="Category")
         amount_label = tk.Label(add_expense_window, text="Amount")
         date_label = tk.Label(add_expense_window, text="Date")
         is_planned_label = tk.Label(add_expense_window, text="Planned")
-        country_label = tk.Label(add_expense_window, text="Country")
         
         # Create the entry fields and dropdown for each label
         name_entry = tk.Entry(add_expense_window, takefocus=True)
+        # Category Dropdown
         category_name = tk.StringVar()
         category_name.set(self.categories["flights"][0].title())
-        category_dropdown = tk.OptionMenu(add_expense_window, category_name, *[subcategory.title() for category in self.categories.values() for subcategory in category])
+        category_dropdown = tk.OptionMenu(
+            add_expense_window, 
+            category_name, 
+            *[subcategory.title() for category in self.categories.values() for subcategory in category])
         category_dropdown.config(width=16)
+        # Entries
         amount_entry = tk.Entry(add_expense_window)
         date_entry = tk.Entry(add_expense_window)
         date_entry.insert(0, dt.datetime.now().strftime("%d.%m.%Y"))
         checkbox_var = tk.BooleanVar()
         is_planned_checkbox = tk.Checkbutton(add_expense_window, variable=checkbox_var)
+        # Country dropdown
         country_names = self.all_countries
         country_name = tk.StringVar()
         country_name.set(self.country_name.get())
-        country_dropdown = tk.OptionMenu(add_expense_window, country_name, *[country.title() for country in country_names])
-        add_button = tk.Button(add_expense_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
+        country_dropdown = tk.OptionMenu(
+            add_expense_window, 
+            country_name, 
+            *[country.title() for country in country_names])
+        # Buttons
+        add_button = tk.Button(
+            add_expense_window, 
+            text="Add", 
+            command=lambda: self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
+        add_category_button = tk.Button(
+            add_expense_window,
+            text="+",
+            command=self.add_category_window
+        )
         
         # Add the widgets to the window using the grid layout
         name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
@@ -213,6 +231,7 @@ class UI:
         country_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
         category_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
         category_dropdown.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
+        add_category_button.grid(row=2, column=2, padx=5, pady=5, sticky='ew')
         amount_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
         amount_entry.grid(row=3, column=1, padx=5, pady=5, sticky='ew')
         date_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
@@ -220,6 +239,24 @@ class UI:
         is_planned_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
         is_planned_checkbox.grid(row=5, column=1, padx=5, pady=5, sticky='ew')
         add_button.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        
+    def add_category_window(self):
+        add_category_window = tk.Toplevel(self.window)
+        add_category_window.title("Add category")
+        
+        tk.Label(add_category_window, text="Category").grid(row=0, column=0)
+        tk.Label(add_category_window, text="Main Category").grid(row=1, column=0)
+        
+        category_entry = tk.Entry(add_category_window)
+        main_category_var = tk.StringVar()
+        main_category_var.set("Other")
+        main_categories = ["Flights", "Accommodation", "Trips", "Food", "Transport", "Other"]
+        main_category_dropdown = tk.OptionMenu(add_category_window, main_category_var, *main_categories)
+        add_button = tk.Button(add_category_window, text="Add", command=lambda: add_category(sub_category=category_entry.get(), main_category=main_category_var.get()))
+        
+        category_entry.grid(row=0, column=1, sticky="ew")
+        main_category_dropdown.grid(row=1, column=1, sticky="ew")
+        add_button.grid(row=2, column=0, columnspan=2, sticky="ew")
         
     def import_expenses_window(self):
         import_expenses_window = tk.Toplevel(self.window)
