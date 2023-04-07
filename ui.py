@@ -133,7 +133,7 @@ class UI:
         self.add_expense_button = tk.Button(self.tab1, text="Add expense", command=self.add_expense_window)
         self.add_expense_button.grid(row=13, column=0, columnspan=3, sticky='ew')
         
-        self.import_button = tk.Button(self.tab1, text="Import..", command=lambda: (importer.mass_import(path=filedialog.askopenfilename(initialdir = "/", title="Select A File")), self.update_expenses))
+        self.import_button = tk.Button(self.tab1, text="Import..", command=self.import_and_update_expenses)
         self.import_button.grid(row=14, column=0, columnspan=3, sticky='ew')
         
         ### Tab 2 ###
@@ -309,22 +309,10 @@ class UI:
         main_category_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
         add_button.grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
         
-    def import_expenses_window(self):
-        import_expenses_window = tk.Toplevel(self.window)
-        import_expenses_window.title("Import expenses")
-        import_expenses_window.geometry("300x250")
-        import_expenses_window.resizable(False, False)
-        
+    def import_and_update_expenses(self):
         file_name = filedialog.askopenfilename(initialdir = "/", title="Select A File")
-        
-        path_entry_label = tk.Label(import_expenses_window, text="Path to file")
-        path_entry_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
-        path_entry = tk.Entry(import_expenses_window)
-        path_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
-        path_entry.insert(0, "/Users/jonathankeller/Documents/Programming/finance-overview/data.csv")
-        
-        import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: importer.mass_import(path=file_name))
-        import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
+        importer.mass_import(path=file_name)
+        self.tab1.after(1000, self.update_expenses)
 
     def add_expense(self, name: str, cost: str, category: str, country="", date="01.01.1970", start_date="01.01.1970", end_date="31.12.2100", frequency="Yearly", is_planned=False, fixed=False):
         # Add the expense to the database
@@ -333,11 +321,7 @@ class UI:
         else:
             added_successfully = self.databases["country"].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned, country=country)
             self.update_expenses()
-            self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
-            self.country_name.set(self.dropdown_countries[0])
-            self.dropdown['menu'].delete(0, 'end')
-            for country in self.dropdown_countries:
-                self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
+            
         if not added_successfully:
             messagebox.showerror("Error", "There is something wrong with the input.")
             return
@@ -345,6 +329,13 @@ class UI:
             messagebox.showinfo("Success", "Expense added successfully.")
           
     def update_expenses(self, *args):
+        # Update dropdown with new countries
+        if len(self.databases["country"].get_selected_countries()) > 0:
+            self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
+            self.country_name.set(self.dropdown_countries[0])
+            self.dropdown['menu'].delete(0, 'end')
+            for country in self.dropdown_countries:
+                self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
         # Update overview costs
         selected_country = self.country_name.get()
         total_cost_actual = self.databases["country"].get_total_cost(selected_country)
