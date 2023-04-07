@@ -142,52 +142,12 @@ class UI:
         self.fixed_cost = tk.Label(self.tab2, text="0")
         self.fixed_cost.grid(row=0, column=1, sticky='e')
         
-        self.add_fixed_cost_button = tk.Button(self.tab2, text="Add fixed cost", command=self.add_fixed_cost_window)
-        self.add_fixed_cost_button.grid(row=1, column=0, columnspan=2, sticky='ew')
+        # self.add_fixed_cost_button = tk.Button(self.tab2, text="Add fixed cost", command=self.add_fixed_cost_window)
+        # self.add_fixed_cost_button.grid(row=1, column=0, columnspan=2, sticky='ew')
 
         self.update_expenses()
         
         self.window.mainloop()
-          
-    def add_fixed_cost_window(self):
-        add_fixed_cost_window = tk.Toplevel(self.window)
-        add_fixed_cost_window.title("Add fixed expense")
-        add_fixed_cost_window.geometry("300x250")
-        add_fixed_cost_window.resizable(False, False)
-        
-        add_fixed_cost_window.columnconfigure(0, weight=1)
-        add_fixed_cost_window.columnconfigure(1, weight=1)
-        
-        # Create the labels for the input fields
-        # def add_expense(self, name: str, cost: float, frequency="yearly", start_date=datetime.now(), end_date=datetime.now()):
-        name_label = tk.Label(add_fixed_cost_window, text="Name")
-        amount_label = tk.Label(add_fixed_cost_window, text="Amount")
-        frequency_label = tk.Label(add_fixed_cost_window, text="Frequency")
-        start_date_label = tk.Label(add_fixed_cost_window, text="Start Date")
-        end_date_label = tk.Label(add_fixed_cost_window, text="End Date")
-        
-        # Create the entry fields and dropdown for each label
-        name_entry = tk.Entry(add_fixed_cost_window, takefocus=True)
-        frequency_name = tk.StringVar()
-        frequency_name.set("Yearly")
-        frequency_dropdown = tk.OptionMenu(add_fixed_cost_window, frequency_name, *["Yearly", "Monthly", "Weekly"])
-        frequency_dropdown.config(width=16)
-        amount_entry = tk.Entry(add_fixed_cost_window)
-        date_entry = tk.Entry(add_fixed_cost_window, text=dt.datetime.now().strftime("%d.%m.%Y"))
-        checkbox_var = tk.BooleanVar()
-        is_planned_checkbox = tk.Checkbutton(add_fixed_cost_window, variable=checkbox_var)
-        add_button = tk.Button(add_fixed_cost_window, text="Add", command=lambda: self.add_expense(name=name_entry.get(), category=frequency_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()), state="disabled")
-        
-        # Add the widgets to the window using the grid layout
-        name_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
-        name_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
-        frequency_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
-        frequency_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky='w')
-        amount_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
-        amount_entry.grid(row=2, column=1, padx=5, pady=5, sticky='w')
-        start_date_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
-        date_entry.grid(row=3, column=1, padx=5, pady=5, sticky='w')
-        add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
           
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
@@ -252,7 +212,8 @@ class UI:
         add_button = tk.Button(
             tab1, 
             text="Add", 
-            command=lambda: self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
+            command=lambda: (self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()),
+                             add_expense_window.destroy()))
         add_category_button = tk.Button(
             tab1,
             text="+",
@@ -287,7 +248,9 @@ class UI:
         name_entry2 = tk.Entry(tab2)
         cost_entry = tk.Entry(tab2)
         start_date_entry = tk.Entry(tab2)
+        start_date_entry.insert(0, dt.datetime.now().strftime("%d.%m.%Y"))
         end_date_entry = tk.Entry(tab2)
+        end_date_entry.insert(0, dt.datetime(2100, 12, 31).strftime("%d.%m.%Y"))
         
         # Dropdowns
         frequencies = ['Daily', 'Weekly', 'Biweekly', 'Monthly', 'Quarterly', 'Semi-Annually', 'Annually']
@@ -304,7 +267,8 @@ class UI:
         add_button2 = tk.Button(
             tab2, 
             text="Add", 
-            command=lambda: self.add_fixed_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()))
+            command=lambda: (self.add_expense(name=name_entry2.get(), frequency=frequency_var.get(), category=category_name2.get(), cost=cost_entry.get(), start_date=start_date_entry.get(), end_date=end_date_entry.get(), fixed=True),
+                             add_expense_window.destroy()))
         add_category_button2 = tk.Button(
             tab2,
             text="+",
@@ -326,7 +290,6 @@ class UI:
         end_date_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
         end_date_entry.grid(row=5, column=1, columnspan=2, padx=5, pady=5, sticky='ew')
         add_button2.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky='ew')
-        
         
     def add_category_window(self):
         add_category_window = tk.Toplevel(self.window)
@@ -363,21 +326,25 @@ class UI:
         import_button = tk.Button(import_expenses_window, text="Import..", command=lambda: importer.mass_import(path=path_entry.get()))
         import_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
-    def add_expense(self, name: str, country: str, category: str, cost: str, date: str, is_planned: bool):
+    def add_expense(self, name: str, cost: str, category: str, country="", date="01.01.1970", start_date="01.01.1970", end_date="31.12.2100", frequency="Yearly", is_planned=False, fixed=False):
         # Add the expense to the database
-        added_successfully = self.databases["country"].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned, country=country)
+        if fixed:
+            added_successfully = self.databases["fixed"].add_expense(name=name, cost=cost, frequency=frequency, category=category, start_date=start_date, end_date=end_date)
+        else:
+            added_successfully = self.databases["country"].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned, country=country)
+            self.update_expenses()
+            self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
+            self.country_name.set(self.dropdown_countries[0])
+            self.dropdown['menu'].delete(0, 'end')
+            for country in self.dropdown_countries:
+                self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
         if not added_successfully:
             messagebox.showerror("Error", "There is something wrong with the input.")
             return
         else:
             messagebox.showinfo("Success", "Expense added successfully.")
-        self.update_expenses()
-        self.dropdown_countries = [country.title() for country in self.databases["country"].get_selected_countries()]
-        self.country_name.set(self.dropdown_countries[0])
-        self.dropdown['menu'].delete(0, 'end')
-        for country in self.dropdown_countries:
-            self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
         
+    
     def update_expenses(self, *args):
         # Update overview costs
         selected_country = self.country_name.get()
