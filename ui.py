@@ -131,26 +131,7 @@ class UI:
         self.update_expenses()
         
         self.window.mainloop()
-        
-    def add_country_window(self):
-        add_country_window = tk.Toplevel(self.window)
-        add_country_window.title("Add country")
-        add_country_window.geometry("300x300")
-        add_country_window.resizable(False, False)
-        
-        add_country_window.columnconfigure(0, weight=1)
-        add_country_window.columnconfigure(1, weight=1)
-        
-        # Label
-        tk.Label(add_country_window, text="Country:").grid(row=0, column=0, sticky="e")
-        
-        # Dropdown
-        country_name = tk.StringVar()
-        country_name.set(self.all_countries[0])
-        country_dropdown = tk.OptionMenu(add_country_window, country_name, *self.all_countries)
-        country_dropdown.grid(row=0, column=1, sticky="w")
-        
-        
+          
     def add_fixed_cost_window(self):
         add_fixed_cost_window = tk.Toplevel(self.window)
         add_fixed_cost_window.title("Add fixed expense")
@@ -190,8 +171,7 @@ class UI:
         start_date_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
         date_entry.grid(row=3, column=1, padx=5, pady=5, sticky='w')
         add_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
-        
-    
+          
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
         add_expense_window.title("Add expense")
@@ -271,8 +251,6 @@ class UI:
         for country in self.dropdown_countries:
             self.dropdown['menu'].add_command(label=country, command=tk._setit(self.country_name, country))
         
-        
-    
     def update_expenses(self, *args):
         # Update overview costs
         selected_country = self.country_name.get()
