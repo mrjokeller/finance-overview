@@ -14,6 +14,11 @@ FONTS = {
     "title": ("Helvetica Neue Ultralight", 22)
 }
 
+COLORS = {
+    "light_green": "#24ef4a",
+    "dark_green": "#057a05"
+}
+
 
 def get_countries():
     with open("./data.json", "r") as f:
@@ -70,9 +75,13 @@ class UI:
         self.window.config(padx=20, pady=20)
         self.window.option_add("*Font", FONTS["body"])
         if darkdetect.isDark():
+            self.window.option_add("*HighlightBackground", "#3a3a3a")
             self.window.option_add("*Background", "#3a3a3a")
+            self.window.option_add("*Entry.Background", "#1e1e1e")
         else:
+            self.window.option_add("*HighlightBackground", "#e4e4e4")
             self.window.option_add("*Background", "#e4e4e4")
+            self.window.option_add("*Entry.Background", "white")
         # Setup tabs
         self.tabview = ttk.Notebook(self.window, width=400, height=400)
         self.tab1 = ttk.Frame(self.tabview)
@@ -165,15 +174,15 @@ class UI:
     def add_expense_window(self):
         add_expense_window = tk.Toplevel(self.window)
         add_expense_window.title("Add expense")
-        add_expense_window.geometry("400x380")
+        add_expense_window.geometry("395x335")
         add_expense_window.resizable(False, False)
-        add_expense_window.config(padx=10, pady=10)
+        add_expense_window.config(padx=5, pady=5)
         
         # add_expense_window.columnconfigure(0, weight=1)
         # add_expense_window.columnconfigure(1, weight=1)
         
         # Setup tabs
-        tabview = ttk.Notebook(add_expense_window, width=330, height=280)
+        tabview = ttk.Notebook(add_expense_window, width=330, height=260)
         tab1 = ttk.Frame(tabview)
         tab2 = ttk.Frame(tabview)
         tabview.add(tab1, text="Standard")
@@ -364,7 +373,8 @@ class UI:
         
         self.total_cost.config(text=f"{total_cost_actual:.2f} €")
         self.total_planned_cost.config(text=f"{total_cost_planned:.2f} €")
-        self.difference.config(text=f"{difference:.2f} €", fg="red" if difference < 0 else "green")
+        green = COLORS["light_green"] if darkdetect.isDark() else COLORS["dark_green"]
+        self.difference.config(text=f"{difference:.2f} €", fg="red" if difference < 0 else green)
         
         
         # Remove existing category labels
