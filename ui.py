@@ -22,7 +22,11 @@ def get_categories():
         categories_dict = json.load(f)["categories"]
     return categories_dict
     
-def add_category(sub_category: str, main_category="other"):#
+def add_category(sub_category: str, main_category="other"):
+    for list in get_categories().values():
+        if sub_category.lower() in list:
+            messagebox.showwarning(title="Warning", message=f"The category '{sub_category.capitalize()}' already exists.")
+            return
     if messagebox.askokcancel(title="Check again", message=f"Is this right?\nCategory: {sub_category}\nMain Category: {main_category}"):
         with open("./data.json", "r") as f:
             data = json.load(f)
