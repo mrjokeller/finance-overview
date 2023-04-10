@@ -274,7 +274,8 @@ class UI:
             text="Add",
             font=FONTS["body"], 
             command=lambda: (self.add_expense(name=name_entry.get(), country=country_name.get(), category=category_name.get(), cost=amount_entry.get(), date=date_entry.get(), is_planned=checkbox_var.get()),
-                             add_expense_window.destroy()))
+                             add_expense_window.destroy()
+                             ))
         add_category_button = tk.Button(
             tab1,
             text="+",
@@ -388,12 +389,15 @@ class UI:
         else:
             added_successfully = self.databases["country"].add_expense(name=name, category=category, cost=cost, date=date, is_planned=is_planned, country=country)
             self.update_expenses()
-            
-        if not added_successfully:
-            messagebox.showerror("Error", "There is something wrong with the input.")
-            return
+            self.update_country_dropdown()
+        
+        if added_successfully:
+            pass
+            # messagebox.showinfo("Success", "Expense added successfully.")
         else:
-            messagebox.showinfo("Success", "Expense added successfully.")
+            # messagebox.showerror("Error", "There is something wrong with the input.")
+            return
+            
             
     def update_country_dropdown(self):
         self.dropdown_countries = [country.title() for country in self.databases["country"].get_all_countries()]
@@ -414,7 +418,6 @@ class UI:
         green = COLORS["light_green"] if darkdetect.isDark() else COLORS["dark_green"]
         self.difference.config(text=f"{difference:.2f} €", fg="red" if difference < 0 else green)
         
-        
         # Remove existing category labels
         for label in self.category_labels.values():
             label.destroy()
@@ -425,6 +428,7 @@ class UI:
         categories_planned = self.databases["country"].get_category_cost(selected_country, is_planned=True)
         
         for i, category in enumerate(self.categories):
+            
             # Category Label
             label = tk.Label(self.tab1, text=category.capitalize())
             label.grid(row=i+3, column=0, sticky='w')
